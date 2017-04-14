@@ -2,11 +2,14 @@ package com.emagroup.example;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.emagroup.imsdk.EmaImSdk;
 import com.emagroup.imsdk.ImConstants;
+import com.emagroup.imsdk.MsgBean;
+import com.emagroup.imsdk.MsgHeartResponse;
 
 import java.util.HashMap;
 
@@ -55,6 +58,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+    private void doUpdate() {
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID,"01");
+        param.put(ImConstants.UID,"5");
+        param.put(ImConstants.TEAM_ID,"123");
+        param.put(ImConstants.UNION_ID,"b");
+        param.put(ImConstants.WORLD_ID,"a");
+        param.put(ImConstants.WORLD_LIMIT,"10");
+        param.put(ImConstants.UNION_LIMIT,"10");
+        EmaImSdk.getInstance().updateInfo(param);
+    }
+
+    private void doHeart() {
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID,"01");
+        param.put(ImConstants.UID,"5");
+        param.put(ImConstants.TEAM_ID,"123");
+        param.put(ImConstants.UNION_ID,"b");
+        param.put(ImConstants.WORLD_ID,"a");
+        EmaImSdk.getInstance().msgHeart(param, new MsgHeartResponse() {
+            @Override
+            public void onUnionMsgGet(MsgBean msgBean) {
+                Log.e("mmmmmmmm",msgBean.getMsg());
+            }
+
+            @Override
+            public void onWorldMsgGet(MsgBean msgBean) {
+
+            }
+        },2);
+    }
 
 
     @Override
@@ -64,10 +98,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doLogin();
                 break;
             case R.id.bt_update_info:
-
+                doUpdate();
                 break;
             case R.id.bt_heart_beat:
-
+                doHeart();
                 break;
             case R.id.bt_send_msg:
 
@@ -75,4 +109,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
+
 }

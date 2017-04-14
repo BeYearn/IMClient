@@ -9,51 +9,36 @@ import android.content.Context;
 
 public class ImUrl {
 
-    private static String serverUrl="http://118.178.230.138:8080/";
+    private static String serverUrl = "http://118.178.230.138:8080/";
     private static String STAGING_SERVER_URL;
     private static String TESTING_SERVER_URL;
     private static String PRODU_CTION_SERVER_URL;
 
 
+    public static String getLoginUrl() {
 
-
-    public static String  getLoginUrl(){
-
-        return serverUrl+"ema-im/register/login";
+        return serverUrl + "ema-im/register/login";
     }
 
 
-    public static String  getUpdateInfoUrl(){
+    public static String getUpdateInfoUrl() {
 
-        return serverUrl+"ema-im/register/updateInfo";
+        return serverUrl + "ema-im/register/updateInfo";
     }
 
 
+    public static String getHeartUrl() {
+        return serverUrl + "ema-im/chat/heart";
+    }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public static void initUrl(Context context){
+    public static void initUrl(Context context) {
         String emaEnvi = ConfigUtils.getEnvi(context);
         if ("staging".equals(emaEnvi)) {
             ImUrl.setServerUrl(ImUrl.STAGING_SERVER_URL);
         } else if ("testing".equals(emaEnvi)) {
             ImUrl.setServerUrl(ImUrl.TESTING_SERVER_URL);
-        } else if("production".equals(emaEnvi)){
+        } else if ("production".equals(emaEnvi)) {
             ImUrl.setServerUrl(ImUrl.PRODU_CTION_SERVER_URL);
         }
     }
@@ -65,9 +50,6 @@ public class ImUrl {
     public static void setServerUrl(String serverUrl) {
         ImUrl.serverUrl = serverUrl;
     }
-
-
-
 
 
 }
