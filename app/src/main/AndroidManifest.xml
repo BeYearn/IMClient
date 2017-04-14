@@ -10,6 +10,23 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
+        <meta-data
+            android:name="EMA_APP_ID"
+            android:value="n20007" />
+        <meta-data
+            android:name="EMA_CHANNEL_ID"
+            android:value="n26" />
+        <meta-data
+            android:name="EMA_CHANNEL_TAG"
+            android:value="n1001" />
+        <meta-data
+            android:name="EMA_WHICH_ENVI"
+            android:value="xxxx" />
+
+
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

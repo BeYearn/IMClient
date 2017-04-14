@@ -31,7 +31,6 @@ public class HttpRequestor {
     private Integer proxyPort = null;
 
 
-
     public void doPostAsync(String url, Map<String, String> params, OnResponsetListener listener) {
 
         final String _url = url;
@@ -60,7 +59,7 @@ public class HttpRequestor {
             @Override
             public void run() {
                 try {
-                    doGet(_url, _listener);
+                    doGet(_url, _params,_listener);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -78,8 +77,13 @@ public class HttpRequestor {
      * @throws Exception
      * @throws IOException
      */
-    private void doGet(String url, OnResponsetListener listener) throws Exception {
+    private void doGet(String url, Map<String, String> params, OnResponsetListener listener) throws Exception {
 
+        //返回值
+        StringBuffer resultSb = new StringBuffer();
+        // 拼凑get请求的URL字串，使用URLEncoder.encode对特殊和不可见字符进行编码
+        url = buildUrl(url, params);
+        Log.e(TAG, "url_:" + url);
         URL localURL = new URL(url);
 
         URLConnection connection = openConnection(localURL);
@@ -133,7 +137,7 @@ public class HttpRequestor {
      * @return
      * @throws Exception
      */
-    private void doPost(String url, Map parameterMap, OnResponsetListener listener) throws Exception {
+    private void doPost(String url, Map<String, String> parameterMap, OnResponsetListener listener) throws Exception {
 
         StringBuilder parameterBuffer = new StringBuilder();
         if (parameterMap != null) {
@@ -218,12 +222,40 @@ public class HttpRequestor {
     }
 
 
+    /**
+     * 拼接url
+     *
+     * @param url
+     * @param map
+     * @return
+     */
+    private String buildUrl(String url, Map<String, String> map) {
+        if (map == null || map.size() == 0) {
+            return url;
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append(url);
+        int i = 0;
+        for (String key : map.keySet()) {
+            if (i == 0) {
+                sb.append("?");
+            } else {
+                sb.append("&");
+            }
+            sb.append(key).append("=").append(map.get(key));
+            i++;
+        }
+        return sb.toString();
+    }
+
+
     public interface OnResponsetListener {
         public abstract void OnResponse(String result);
     }
 
     private void setOnresponse(OnResponsetListener listener, String result) {
         if (listener != null) {
+            Log.e("httpResponse",result);
             listener.OnResponse(result);
         } else {
             Log.e(TAG, "OnResponsetListener is null");
