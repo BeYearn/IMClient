@@ -5,7 +5,7 @@ package com.emagroup.imsdk;
  */
 public interface MsgHeartResponse {
 
-    void onUnionMsgGet(MsgBean msgBean);
+    void onUnionMsgGet(MsgBean unionMsgBean);
 
-    void onWorldMsgGet(MsgBean msgBean);
+    void onWorldMsgGet(MsgBean worldMsgBean);
 }

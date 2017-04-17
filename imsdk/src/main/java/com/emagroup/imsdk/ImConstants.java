@@ -15,4 +15,11 @@ public class ImConstants {
     public static final String UNION_LIMIT="unionLimit";
     public static final String TIME_STAMP="ts";
     public static final String SIGN="sign";
+
+
+    public static final int EMA_IM_HEART_OK=101;
+    public static final int EMA_IM_PUMP_MSG=102;
+
+    public static final int EMA_IM_UNION_MSG=201;
+    public static final int EMA_IM_WORLD_MSG=202;
 }
