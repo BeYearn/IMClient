@@ -59,6 +59,10 @@ public class EmaImSdk {
     private EmaImSdk() {
     }
 
+    /**
+     * 获得单例
+     * @return
+     */
     public static EmaImSdk getInstance() {
         if (null == instance) {
             instance = new EmaImSdk();
@@ -66,13 +70,21 @@ public class EmaImSdk {
         return instance;
     }
 
-
+    /**
+     * 初始化
+     * @param context
+     * @param key
+     */
     public void init(Context context, String key) {
         this.mContext = context;
         this.appKey = key;
         ImUrl.initUrl(context);
     }
 
+    /**
+     * 登录服务器
+     * @param param
+     */
     public void login(HashMap<String, String> param) {
 
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
@@ -97,7 +109,10 @@ public class EmaImSdk {
         });
     }
 
-
+    /**
+     * 更新服务器信息
+     * @param param
+     */
     public void updateInfo(HashMap<String, String> param) {
 
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
@@ -121,6 +136,12 @@ public class EmaImSdk {
     }
 
 
+    /**
+     * 心跳 获取工会和世界信息
+     * @param param
+     * @param response
+     * @param delay
+     */
     public void msgHeart(final HashMap<String, String> param, final MsgHeartResponse response, final int delay) {
 
         this.mHeartResponse = response;
@@ -138,6 +159,8 @@ public class EmaImSdk {
             }
         }, 0, delay * 1000);
     }
+
+    //---------------------------------------------------------------------------------------------
 
     private void pumpMsg(final int type, final MsgQueue msgQueue, final int delay) {
 
@@ -157,7 +180,7 @@ public class EmaImSdk {
         });
     }
 
-    public void perHeart(HashMap<String, String> param, final MsgQueue unionMsgQueue, final MsgQueue worldMsgQueue) {
+    private void perHeart(HashMap<String, String> param, final MsgQueue unionMsgQueue, final MsgQueue worldMsgQueue) {
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
@@ -200,7 +223,7 @@ public class EmaImSdk {
         });
     }
 
-    public MsgBean getMsgBean(JSONObject obj) {
+    private MsgBean getMsgBean(JSONObject obj) {
         MsgBean msgBean = new MsgBean();
         try {
             msgBean.setAppId(obj.getString("appId"));
