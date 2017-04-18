@@ -32,6 +32,10 @@ public class ImUrl {
     }
 
 
+    public static String getSendMdgUrl() {
+        return serverUrl + "ema-im/chat/sendMsg";
+    }
+
     public static void initUrl(Context context) {
         String emaEnvi = ConfigUtils.getEnvi(context);
         if ("staging".equals(emaEnvi)) {
@@ -50,6 +54,5 @@ public class ImUrl {
     public static void setServerUrl(String serverUrl) {
         ImUrl.serverUrl = serverUrl;
     }
-
 
 }

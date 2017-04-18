@@ -29,6 +29,7 @@ public class HttpRequestor {
     private Integer socketTimeout = null;
     private String proxyHost = null;
     private Integer proxyPort = null;
+    private boolean isDebug = true;
 
 
     public void doPostAsync(String url, Map<String, String> params, OnResponsetListener listener) {
@@ -59,7 +60,7 @@ public class HttpRequestor {
             @Override
             public void run() {
                 try {
-                    doGet(_url, _params,_listener);
+                    doGet(_url, _params, _listener);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -125,7 +126,7 @@ public class HttpRequestor {
             }
         }
         String result = resultBuffer.toString();
-        setOnresponse(listener, result);
+        setOnResponse(listener, result);
     }
 
     /**
@@ -158,7 +159,9 @@ public class HttpRequestor {
             }
         }
 
-        System.out.println("POST parameter : " + parameterBuffer.toString());
+        if(isDebug){
+            Log.e("postUrl", url + "?" + parameterBuffer.toString());
+        }
 
         URL localURL = new URL(url);
 
@@ -218,7 +221,7 @@ public class HttpRequestor {
             }
         }
         String result = resultBuffer.toString();
-        setOnresponse(listener, result);
+        setOnResponse(listener, result);
     }
 
 
@@ -253,9 +256,11 @@ public class HttpRequestor {
         public abstract void OnResponse(String result);
     }
 
-    private void setOnresponse(OnResponsetListener listener, String result) {
+    private void setOnResponse(OnResponsetListener listener, String result) {
         if (listener != null) {
-            Log.e("httpResponse",result);
+            if (isDebug) {
+                Log.e("httpResponse", result);
+            }
             listener.OnResponse(result);
         } else {
             Log.e(TAG, "OnResponsetListener is null");

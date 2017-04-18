@@ -10,8 +10,10 @@ import android.widget.Button;
 
 import com.emagroup.imsdk.EmaImSdk;
 import com.emagroup.imsdk.ImConstants;
+import com.emagroup.imsdk.ImResponse;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.MsgHeartResponse;
+import com.emagroup.imsdk.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RecyclerView recylerMsg;
     private MsgAdapter mMsgAdapter;
     private ArrayList<String> mDataList;
+    private Button btClearAll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +41,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btUpdateInfo = (Button) findViewById(R.id.bt_update_info);
         btheart = (Button) findViewById(R.id.bt_heart_beat);
         btSendMsg = (Button) findViewById(R.id.bt_send_msg);
+        btClearAll = (Button) findViewById(R.id.bt_clear_all);
 
         btLogin.setOnClickListener(this);
         btUpdateInfo.setOnClickListener(this);
         btheart.setOnClickListener(this);
         btSendMsg.setOnClickListener(this);
-
+        btClearAll.setOnClickListener(this);
 
 
         recylerMsg = (RecyclerView) findViewById(R.id.recycler_msg);
@@ -65,7 +69,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         param.put(ImConstants.WORLD_ID, "a");
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().login(param);
+        EmaImSdk.getInstance().login(param,new ImResponse(){
+            @Override
+            public void onSuccessResponse() {
+                ToastHelper.toast(MainActivity.this,"login success");
+            }
+        });
     }
 
 
@@ -78,7 +87,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         param.put(ImConstants.WORLD_ID, "a");
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().updateInfo(param);
+        EmaImSdk.getInstance().updateInfo(param,new ImResponse(){
+            @Override
+            public void onSuccessResponse() {
+                ToastHelper.toast(MainActivity.this,"updateInfo success");
+            }
+        });
     }
 
     private void doHeart() {
@@ -111,7 +125,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }, 5);
     }
-
+    private void doSendMsg() {
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID, "01");
+        param.put(ImConstants.FUID, "6");
+        param.put(ImConstants.FNAME,"beyearn");
+        param.put(ImConstants.HANDLER, "4");    // 5世界 4工会
+        param.put(ImConstants.TID, "c工会");
+        param.put(ImConstants.MSG,"beyearnsmsg");
+        EmaImSdk.getInstance().sendMsg(param, new ImResponse() {
+            @Override
+            public void onSuccessResponse() {
+                ToastHelper.toast(MainActivity.this,"send msg success");
+            }
+        });
+    }
 
     @Override
     public void onClick(View v) {
@@ -126,10 +154,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doHeart();
                 break;
             case R.id.bt_send_msg:
-
+                doSendMsg();
+                break;
+            case R.id.bt_clear_all:
+                mDataList.clear();
+                mMsgAdapter.notifyDataSetChanged();
                 break;
         }
 
     }
+
+
 
 }

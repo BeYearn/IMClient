@@ -6,14 +6,15 @@ import android.os.Message;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.emagroup.imsdk.ImConstants.EMA_IM_HEART_OK;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_PUMP_MSG;
+import static com.emagroup.imsdk.ImConstants.EMA_IM_PUT_MSG_OK;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_UNION_MSG;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_WORLD_MSG;
 
@@ -35,7 +36,7 @@ public class EmaImSdk {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case EMA_IM_HEART_OK:
+                case EMA_IM_PUT_MSG_OK:
                     Log.e("heart ok", "ddddddd");
                     pumpMsg(EMA_IM_UNION_MSG, mUnionMsgQueue, mHeartDelay);
                     pumpMsg(EMA_IM_WORLD_MSG, mWorldMsgQueue, mHeartDelay);
@@ -88,7 +89,7 @@ public class EmaImSdk {
      *
      * @param param
      */
-    public void login(HashMap<String, String> param) {
+    public void login(HashMap<String, String> param, final ImResponse response) {
 
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
@@ -102,6 +103,10 @@ public class EmaImSdk {
                 try {
 
                     JSONObject jsonObject = new JSONObject(result);
+                    int status = jsonObject.getInt("status");
+                    if(0==status){
+                     response.onSuccessResponse();
+                    }
                     JSONObject data = jsonObject.getJSONObject("data");
                     String serverHost = data.getString("host");
 
@@ -117,7 +122,7 @@ public class EmaImSdk {
      *
      * @param param
      */
-    public void updateInfo(HashMap<String, String> param) {
+    public void updateInfo(HashMap<String, String> param, final ImResponse response) {
 
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
@@ -131,7 +136,10 @@ public class EmaImSdk {
                 try {
 
                     JSONObject jsonObject = new JSONObject(result);
-
+                    int status = jsonObject.getInt("status");
+                    if(0==status){
+                        response.onSuccessResponse();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -159,10 +167,31 @@ public class EmaImSdk {
             @Override
             public void run() {
 
-                perHeart(param, mUnionMsgQueue, mWorldMsgQueue);  //应该搞个handler来说明网络心跳完了才能再执行下面的循环或者直接在下面进行
+                perHeart(param);  //应该搞个handler来说明网络心跳完了才能再执行下面的循环或者直接在下面进行
 
             }
         }, 0, delay * 1000);
+    }
+
+
+    public void sendMsg(final HashMap<String, String> param, final ImResponse response) {
+        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TID) + appKey;
+        sign = ConfigUtils.MD5(sign);
+        param.put(ImConstants.SIGN, sign);
+        new HttpRequestor().doPostAsync(ImUrl.getSendMdgUrl(), param, new HttpRequestor.OnResponsetListener() {
+            @Override
+            public void OnResponse(String result) {
+                try {
+
+                    handleMsgResult(result);   //发送信息（同时获取聊天信息）  发的越快收的越快
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     //---------------------------------------------------------------------------------------------
@@ -178,9 +207,6 @@ public class EmaImSdk {
 
                 MsgBean msgBean = msgQueue.deQueue();
                 while (null != msgBean) {
-                    //new Timer().schedule(new TimerTask() {
-                    //  @Override
-                    //public void run() {
                     Message message = Message.obtain();
                     message.what = EMA_IM_PUMP_MSG;
                     message.arg1 = type;
@@ -191,15 +217,13 @@ public class EmaImSdk {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    // }
-                    //},0,msgdelay);
                     msgBean = msgQueue.deQueue();
                 }
             }
         });
     }
 
-    private void perHeart(HashMap<String, String> param, final MsgQueue unionMsgQueue, final MsgQueue worldMsgQueue) {
+    private void perHeart(HashMap<String, String> param) {
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
@@ -211,35 +235,40 @@ public class EmaImSdk {
             public void OnResponse(String result) {
                 try {
 
-                    JSONObject jsonObject = new JSONObject(result);
-                    JSONObject data = jsonObject.getJSONObject("data");
-
-                    JSONArray unionMsg = data.getJSONArray("unionMsg");
-                    JSONArray worldMsg = data.getJSONArray("worldMsg");
-
-                    for (int i = 0; i < unionMsg.length(); i++) {
-                        JSONObject obj = unionMsg.getJSONObject(i);
-                        MsgBean unionMsgBean = getMsgBean(obj);
-                        unionMsgQueue.enQueue(unionMsgBean);
-                    }
-
-                    for (int i = 0; i < worldMsg.length(); i++) {
-                        JSONObject obj = worldMsg.getJSONObject(i);
-                        MsgBean worldMsgBean = getMsgBean(obj);
-                        worldMsgQueue.enQueue(worldMsgBean);
-                    }
-
-                    Message message = Message.obtain();
-                    message.what = EMA_IM_HEART_OK;
-                    mHandler.sendMessage(message);
-
-                    Log.e("U+W size", unionMsgQueue.QueueLength() + "..." + worldMsgQueue.QueueLength());
+                    handleMsgResult(result);
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    private void handleMsgResult(String result) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(result);
+        JSONObject data = jsonObject.getJSONObject("data");
+
+        JSONArray unionMsg = data.getJSONArray("unionMsg");
+        JSONArray worldMsg = data.getJSONArray("worldMsg");
+
+        for (int i = 0; i < unionMsg.length(); i++) {
+            JSONObject obj = unionMsg.getJSONObject(i);
+            MsgBean unionMsgBean = getMsgBean(obj);
+            mUnionMsgQueue.enQueue(unionMsgBean);
+        }
+
+        for (int i = 0; i < worldMsg.length(); i++) {
+            JSONObject obj = worldMsg.getJSONObject(i);
+            MsgBean worldMsgBean = getMsgBean(obj);
+            mWorldMsgQueue.enQueue(worldMsgBean);
+        }
+
+        Message message = Message.obtain();
+        message.what = EMA_IM_PUT_MSG_OK;
+        mHandler.sendMessage(message);
+
+        Log.e("U+W size", mUnionMsgQueue.QueueLength() + "..." + mWorldMsgQueue.QueueLength());
     }
 
     private MsgBean getMsgBean(JSONObject obj) {
