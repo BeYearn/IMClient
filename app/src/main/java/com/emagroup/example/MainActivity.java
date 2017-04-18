@@ -2,6 +2,8 @@ package com.emagroup.example;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,6 +13,7 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.MsgHeartResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -19,6 +22,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btUpdateInfo;
     private Button btheart;
     private Button btSendMsg;
+    private RecyclerView recylerMsg;
+    private MsgAdapter mMsgAdapter;
+    private ArrayList<String> mDataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btUpdateInfo.setOnClickListener(this);
         btheart.setOnClickListener(this);
         btSendMsg.setOnClickListener(this);
+
+
+
+        recylerMsg = (RecyclerView) findViewById(R.id.recycler_msg);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recylerMsg.setLayoutManager(linearLayoutManager);
+        recylerMsg.setHasFixedSize(true);  // 如果每个item高度一定  这个设置可以提高性能
+        mDataList = new ArrayList<>();
+        mMsgAdapter = new MsgAdapter(mDataList);
+        recylerMsg.setAdapter(mMsgAdapter);
     }
 
 
@@ -77,11 +93,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onUnionMsgGet(MsgBean UnionMsgBean) {
                 Log.e("UnionMsg", UnionMsgBean.getMsg());
+                mDataList.add("公会："+UnionMsgBean.getMsg());
+                mMsgAdapter.notifyDataSetChanged();
+                //mMsgAdapter.notifyItemInserted(mDataList.size());
+
+                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
             }
 
             @Override
             public void onWorldMsgGet(MsgBean worldMsgBean) {
                 Log.e("worldMsg", worldMsgBean.getMsg());
+                mDataList.add("世界："+worldMsgBean.getMsg());
+                mMsgAdapter.notifyDataSetChanged();
+
+                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
             }
 
         }, 5);

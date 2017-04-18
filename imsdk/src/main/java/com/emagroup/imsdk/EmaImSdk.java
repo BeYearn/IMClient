@@ -36,7 +36,7 @@ public class EmaImSdk {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case EMA_IM_HEART_OK:
-                    Log.e("heart ok","ddddddd");
+                    Log.e("heart ok", "ddddddd");
                     pumpMsg(EMA_IM_UNION_MSG, mUnionMsgQueue, mHeartDelay);
                     pumpMsg(EMA_IM_WORLD_MSG, mWorldMsgQueue, mHeartDelay);
                     break;
@@ -61,6 +61,7 @@ public class EmaImSdk {
 
     /**
      * 获得单例
+     *
      * @return
      */
     public static EmaImSdk getInstance() {
@@ -72,6 +73,7 @@ public class EmaImSdk {
 
     /**
      * 初始化
+     *
      * @param context
      * @param key
      */
@@ -83,6 +85,7 @@ public class EmaImSdk {
 
     /**
      * 登录服务器
+     *
      * @param param
      */
     public void login(HashMap<String, String> param) {
@@ -111,6 +114,7 @@ public class EmaImSdk {
 
     /**
      * 更新服务器信息
+     *
      * @param param
      */
     public void updateInfo(HashMap<String, String> param) {
@@ -138,6 +142,7 @@ public class EmaImSdk {
 
     /**
      * 心跳 获取工会和世界信息
+     *
      * @param param
      * @param response
      * @param delay
@@ -167,14 +172,28 @@ public class EmaImSdk {
         ThreadUtil.runInSubThread(new Runnable() {
             @Override
             public void run() {
-                long msgdelay = (long) ((delay / 10.0) * 2000);
+                long msgdelay = (long) ((delay / 10.0) * 1000);
+
                 Log.e("pumpMsg", msgdelay + "");
-                while (!msgQueue.QueueEmpty()) {
+
+                MsgBean msgBean = msgQueue.deQueue();
+                while (null != msgBean) {
+                    //new Timer().schedule(new TimerTask() {
+                    //  @Override
+                    //public void run() {
                     Message message = Message.obtain();
                     message.what = EMA_IM_PUMP_MSG;
                     message.arg1 = type;
-                    message.obj = msgQueue.deQueue();
-                    mHandler.sendMessageDelayed(message, msgdelay);
+                    message.obj = msgBean;
+                    mHandler.sendMessage(message);
+                    try {
+                        Thread.sleep(msgdelay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    // }
+                    //},0,msgdelay);
+                    msgBean = msgQueue.deQueue();
                 }
             }
         });
