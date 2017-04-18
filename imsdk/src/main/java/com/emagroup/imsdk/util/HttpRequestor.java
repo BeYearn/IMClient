@@ -1,4 +1,4 @@
-package com.emagroup.imsdk;
+package com.emagroup.imsdk.util;
 
 /**
  * Created by Administrator on 2016/7/29.

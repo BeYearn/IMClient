@@ -1,4 +1,4 @@
-package com.emagroup.imsdk;
+package com.emagroup.imsdk.util;
 
 /**
  * handler做为static静态变量不依赖于具体界面 防止内存泄漏

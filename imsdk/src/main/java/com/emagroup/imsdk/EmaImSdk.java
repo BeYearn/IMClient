@@ -5,6 +5,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.MsgHeartResponse;
+import com.emagroup.imsdk.util.ConfigUtils;
+import com.emagroup.imsdk.util.HttpRequestor;
+import com.emagroup.imsdk.util.MsgQueue;
+import com.emagroup.imsdk.util.ThreadUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +33,7 @@ public class EmaImSdk {
 
     private static EmaImSdk instance;
     private String appKey;
+    public String mServerHost;
     private Context mContext;
     private MsgHeartResponse mHeartResponse;
     private MsgQueue mUnionMsgQueue;
@@ -104,11 +112,12 @@ public class EmaImSdk {
 
                     JSONObject jsonObject = new JSONObject(result);
                     int status = jsonObject.getInt("status");
-                    if(0==status){
-                     response.onSuccessResponse();
+                    if (0 == status) {
+                        response.onSuccessResponse();
                     }
                     JSONObject data = jsonObject.getJSONObject("data");
                     String serverHost = data.getString("host");
+                    mServerHost = serverHost;
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -137,7 +146,7 @@ public class EmaImSdk {
 
                     JSONObject jsonObject = new JSONObject(result);
                     int status = jsonObject.getInt("status");
-                    if(0==status){
+                    if (0 == status) {
                         response.onSuccessResponse();
                     }
                 } catch (Exception e) {
@@ -173,7 +182,11 @@ public class EmaImSdk {
         }, 0, delay * 1000);
     }
 
-
+    /**
+     * 发送信息（同时获取聊天信息）
+     * @param param
+     * @param response
+     */
     public void sendMsg(final HashMap<String, String> param, final ImResponse response) {
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
@@ -192,6 +205,13 @@ public class EmaImSdk {
                 }
             }
         });
+    }
+
+    /**
+     * 建立长连接
+     */
+    public void exactMsg() {
+
     }
 
     //---------------------------------------------------------------------------------------------
@@ -292,4 +312,9 @@ public class EmaImSdk {
     public String getAppKey() {
         return appKey;
     }
+
+    public String getServerHost(){
+        return mServerHost;
+    }
+
 }

@@ -43,10 +43,10 @@
             android:text="发送信息" />
 
         <Button
-            android:id="@+id/button5"
+            android:id="@+id/bt_socket"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:text="socket" />
 
         <Button
             android:id="@+id/bt_clear_all"

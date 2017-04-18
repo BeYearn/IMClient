@@ -10,10 +10,10 @@ import android.widget.Button;
 
 import com.emagroup.imsdk.EmaImSdk;
 import com.emagroup.imsdk.ImConstants;
-import com.emagroup.imsdk.ImResponse;
+import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.MsgBean;
-import com.emagroup.imsdk.MsgHeartResponse;
-import com.emagroup.imsdk.ToastHelper;
+import com.emagroup.imsdk.response.MsgHeartResponse;
+import com.emagroup.imsdk.util.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,6 +141,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+
+    private void doSocket() {
+        EmaImSdk.getInstance().exactMsg();
+    }
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -155,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.bt_send_msg:
                 doSendMsg();
+                break;
+            case R.id.bt_socket:
+                doSocket();
                 break;
             case R.id.bt_clear_all:
                 mDataList.clear();

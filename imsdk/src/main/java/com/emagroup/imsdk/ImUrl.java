@@ -2,6 +2,8 @@ package com.emagroup.imsdk;
 
 import android.content.Context;
 
+import com.emagroup.imsdk.util.ConfigUtils;
+
 
 /**
  * Created by Administrator on 2017/4/13.

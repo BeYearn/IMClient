@@ -1,4 +1,4 @@
-package com.emagroup.imsdk;
+package com.emagroup.imsdk.util;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;

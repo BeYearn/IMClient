@@ -1,4 +1,4 @@
-package com.emagroup.imsdk;
+package com.emagroup.imsdk.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

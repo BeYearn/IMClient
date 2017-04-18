@@ -1,4 +1,6 @@
-package com.emagroup.imsdk;
+package com.emagroup.imsdk.response;
+
+import com.emagroup.imsdk.MsgBean;
 
 /**
  * Created by Administrator on 2017/4/14.
