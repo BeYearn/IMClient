@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MsgAdapter mMsgAdapter;
     private ArrayList<String> mDataList;
     private Button btClearAll;
+    private Button btLongConnect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +43,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btheart = (Button) findViewById(R.id.bt_heart_beat);
         btSendMsg = (Button) findViewById(R.id.bt_send_msg);
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
+        btLongConnect = (Button) findViewById(R.id.bt_socket);
 
         btLogin.setOnClickListener(this);
         btUpdateInfo.setOnClickListener(this);
         btheart.setOnClickListener(this);
         btSendMsg.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
-
+        btLongConnect.setOnClickListener(this);
 
         recylerMsg = (RecyclerView) findViewById(R.id.recycler_msg);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -69,10 +71,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         param.put(ImConstants.WORLD_ID, "a");
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().login(param,new ImResponse(){
+        EmaImSdk.getInstance().login(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this,"login success");
+                ToastHelper.toast(MainActivity.this, "login success");
             }
         });
     }
@@ -87,10 +89,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         param.put(ImConstants.WORLD_ID, "a");
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().updateInfo(param,new ImResponse(){
+        EmaImSdk.getInstance().updateInfo(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this,"updateInfo success");
+                ToastHelper.toast(MainActivity.this, "updateInfo success");
             }
         });
     }
@@ -107,43 +109,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onUnionMsgGet(MsgBean UnionMsgBean) {
                 Log.e("UnionMsg", UnionMsgBean.getMsg());
-                mDataList.add("公会："+UnionMsgBean.getMsg());
+                mDataList.add("公会：" + UnionMsgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
                 //mMsgAdapter.notifyItemInserted(mDataList.size());
 
-                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
             @Override
             public void onWorldMsgGet(MsgBean worldMsgBean) {
                 Log.e("worldMsg", worldMsgBean.getMsg());
-                mDataList.add("世界："+worldMsgBean.getMsg());
+                mDataList.add("世界：" + worldMsgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
 
-                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
         }, 5);
     }
+
     private void doSendMsg() {
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, "01");
         param.put(ImConstants.FUID, "6");
-        param.put(ImConstants.FNAME,"beyearn");
+        param.put(ImConstants.FNAME, "beyearn");
         param.put(ImConstants.HANDLER, "4");    // 5世界 4工会
         param.put(ImConstants.TID, "c工会");
-        param.put(ImConstants.MSG,"beyearnsmsg");
+        param.put(ImConstants.MSG, "beyearnsmsg");
         EmaImSdk.getInstance().sendMsg(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this,"send msg success");
+                ToastHelper.toast(MainActivity.this, "send msg success");
             }
         });
     }
 
 
-    private void doSocket() {
-        EmaImSdk.getInstance().exactMsg();
+    private void dobuildConnect() {
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID, "01");
+        param.put(ImConstants.FUID, "6");
+        param.put(ImConstants.HANDLER, "0");    // 0服务器  1心跳  2私聊 3队伍
+        param.put(ImConstants.TID, "0");
+        EmaImSdk.getInstance().buildLongConnect(param, new ImResponse() {
+            @Override
+            public void onSuccessResponse() {
+
+            }
+        });
     }
 
 
@@ -163,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doSendMsg();
                 break;
             case R.id.bt_socket:
-                doSocket();
+                dobuildConnect();
                 break;
             case R.id.bt_clear_all:
                 mDataList.clear();
@@ -172,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-
 
 
 }

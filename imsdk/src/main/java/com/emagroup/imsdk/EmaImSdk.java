@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,13 +33,16 @@ import static com.emagroup.imsdk.ImConstants.EMA_IM_WORLD_MSG;
 public class EmaImSdk {
 
     private static EmaImSdk instance;
-    private String appKey;
     public String mServerHost;
     private Context mContext;
     private MsgHeartResponse mHeartResponse;
     private MsgQueue mUnionMsgQueue;
     private MsgQueue mWorldMsgQueue;
     private int mHeartDelay;
+
+
+    private static String mAppKey;
+    private static String mAppId;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -88,7 +92,8 @@ public class EmaImSdk {
      */
     public void init(Context context, String key) {
         this.mContext = context;
-        this.appKey = key;
+        this.mAppKey = key;
+        this.mAppId = ConfigUtils.getAppId(mContext);
         ImUrl.initUrl(context);
     }
 
@@ -99,10 +104,10 @@ public class EmaImSdk {
      */
     public void login(HashMap<String, String> param, final ImResponse response) {
 
-        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
-        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + appKey;
+        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
         sign = ConfigUtils.MD5(sign);
         param.put(ImConstants.SIGN, sign);
         new HttpRequestor().doPostAsync(ImUrl.getLoginUrl(), param, new HttpRequestor.OnResponsetListener() {
@@ -133,10 +138,10 @@ public class EmaImSdk {
      */
     public void updateInfo(HashMap<String, String> param, final ImResponse response) {
 
-        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
-        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + appKey;
+        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
         sign = ConfigUtils.MD5(sign);
         param.put(ImConstants.SIGN, sign);
         new HttpRequestor().doPostAsync(ImUrl.getUpdateInfoUrl(), param, new HttpRequestor.OnResponsetListener() {
@@ -184,13 +189,14 @@ public class EmaImSdk {
 
     /**
      * 发送信息（同时获取聊天信息）
+     *
      * @param param
      * @param response
      */
     public void sendMsg(final HashMap<String, String> param, final ImResponse response) {
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TID) + appKey;
+        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TID) + mAppKey;
         sign = ConfigUtils.MD5(sign);
         param.put(ImConstants.SIGN, sign);
         new HttpRequestor().doPostAsync(ImUrl.getSendMdgUrl(), param, new HttpRequestor.OnResponsetListener() {
@@ -210,8 +216,13 @@ public class EmaImSdk {
     /**
      * 建立长连接
      */
-    public void exactMsg() {
+    public void buildLongConnect(Map<String, String> param,ImResponse response) {
+            param.put(ImConstants.APP_ID,getAppId());
+            param.put(ImConstants.MSG,"i am long connect info");
+            param.put(ImConstants.MSG_ID,System.currentTimeMillis()+"");
 
+            SocketRunable socketRunable = SocketRunable.getInstance(param,mServerHost, 9999,response);
+            ThreadUtil.runInSubThread(socketRunable);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -244,10 +255,10 @@ public class EmaImSdk {
     }
 
     private void perHeart(HashMap<String, String> param) {
-        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
-        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + appKey;
+        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
         sign = ConfigUtils.MD5(sign);
         param.put(ImConstants.SIGN, sign);
         new HttpRequestor().doPostAsync(ImUrl.getHeartUrl(), param, new HttpRequestor.OnResponsetListener() {
@@ -310,10 +321,14 @@ public class EmaImSdk {
 
 
     public String getAppKey() {
-        return appKey;
+        return mAppKey;
     }
 
-    public String getServerHost(){
+    public String getAppId() {
+        return mAppId;
+    }
+
+    public String getServerHost() {
         return mServerHost;
     }
 
