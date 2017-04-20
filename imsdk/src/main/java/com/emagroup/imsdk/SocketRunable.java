@@ -3,6 +3,7 @@ package com.emagroup.imsdk;
 import android.util.Log;
 
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.PrivateMsgResponse;
 
 import org.json.JSONObject;
 
@@ -30,20 +31,20 @@ public class SocketRunable implements Runnable {
     private BufferedReader mSocketReader;
     private BufferedWriter mSocketWriter;
     private static SocketRunable mInstance;
+    private PrivateMsgResponse mPrivateMsgResponse;
 
-    public static SocketRunable getInstance(Map<String, String> param, String host, int port, ImResponse response){
-        if(mInstance==null){
-            try {
-                mInstance = new SocketRunable(param,host,port,response);
-            } catch (IOException e) {
-                Log.e("SocketRunable","获取soket实例失败");
-                e.printStackTrace();
-            }
+    public static SocketRunable getInstance() {
+        if (mInstance == null) {
+            mInstance = new SocketRunable();
         }
         return mInstance;
     }
 
-    private SocketRunable(Map<String, String> param, String host, int port, ImResponse response) throws IOException {
+    private SocketRunable() {
+
+    }
+
+    public void setStartInfo(Map<String, String> param, String host, int port, ImResponse response) {
         this.mInfoParam = param;
         this.mHost = host;
         this.mPort = port;
@@ -61,47 +62,64 @@ public class SocketRunable implements Runnable {
             mSocketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             mSocketWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
+            //循环不断从socket中读取数据
             String readMsg = null;
+            while ((readMsg = mSocketReader.readLine()) != null) {
+                Log.e("clientTheard", readMsg);   // {"appId":"20007","serverId":"01","fUid":"","fName":"","handler":"96","tId":"6","msg":"","msgId":"1492596604479"}
 
-            //第一步连接成功后受到服务器信息
-            readMsg = mSocketReader.readLine();
-            JSONObject object1 = new JSONObject(readMsg);
-            String handler1 = object1.getString("handler");
+                JSONObject strFromSocket = new JSONObject(readMsg);
 
-            if (!"0".equals(handler1)) {
-                Log.e("longconnection", "1 failed");
-                return;
+                MsgBean msgBean = new MsgBean();
+                msgBean.setAppId(strFromSocket.getString("appId"));
+                msgBean.setfName(strFromSocket.getString("fName"));
+                msgBean.setFuid(strFromSocket.getString("fUid"));
+                msgBean.setHandler(strFromSocket.getString("handler"));
+                msgBean.setMsg(strFromSocket.getString("msg"));
+                msgBean.setMsgId(strFromSocket.getString("msgId"));
+                msgBean.setServerId(strFromSocket.getString("serverId"));
+                msgBean.settID(strFromSocket.getString("tId"));
+
+                switch (Integer.parseInt(msgBean.getHandler())) {
+
+                    case 0: //socket建立成功后受到服务器信息
+
+                        break;
+                    case 96: //提交初始信息后服务器返会
+                        //连接成功回调
+                        mResponse.onSuccessResponse();
+                        break;
+                    case 1:  // 心跳的回应
+                        Log.e("socketHeart", readMsg);
+                        break;
+                    case 2:  //1-1收到的消息
+                        mPrivateMsgResponse.onPersonalMsgGet(msgBean);
+                        break;
+                    case 3:  //组队收到的消息
+                        mPrivateMsgResponse.onTeamMsgGet(msgBean);
+                        break;
+                }
             }
 
-            //第二部向服务器提交信息
-            mSocketWriter.write(new JSONObject(mInfoParam).toString());
-            mSocketWriter.flush();    // 写如记得刷新！！
-
-            readMsg = mSocketReader.readLine();
-            JSONObject object2 = new JSONObject(readMsg);
-            String handler2 = object2.getString("handler");
-
-            if (!"96".equals(handler2)) {
-                Log.e("longconnection", "2 failed");
-                return;
-            }
+            //向服务器提交初始信息
+            putStrIntoSocket(new JSONObject(mInfoParam).toString());
 
             // 第三步开始维持心跳保持连接
             connectHeart();
-
-            //连接成功回调
-            mResponse.onSuccessResponse();
-
-            //循环不断从socket中读取数据
-            while ((readMsg = mSocketReader.readLine()) != null) {
-                Log.e("clientTheard", readMsg);   // {"appId":"20007","serverId":"01","fUid":"","fName":"","handler":"96","tId":"6","msg":"","msgId":"1492596604479"}
-            }
-
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public void putStrIntoSocket(String string) {
+        try {
+            mSocketWriter.write(new JSONObject(mInfoParam).toString());
+            mSocketWriter.flush();    // 写如记得刷新！！
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void connectHeart() {
         Timer timer = new Timer();
@@ -121,7 +139,7 @@ public class SocketRunable implements Runnable {
                     String heartMsg = new JSONObject(heartParam).toString();
                     mSocketWriter.write(heartMsg);
                     mSocketWriter.flush();
-                    Log.e("connectHeartBeat",heartMsg);
+                    Log.e("connectHeartBeat", heartMsg);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -129,4 +147,7 @@ public class SocketRunable implements Runnable {
         }, 0, 20 * 1000);
     }
 
+    public void setOnMsgResponce(PrivateMsgResponse onResponce) {
+        this.mPrivateMsgResponse = onResponce;
+    }
 }

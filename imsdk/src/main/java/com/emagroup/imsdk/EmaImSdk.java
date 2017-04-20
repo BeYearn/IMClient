@@ -6,7 +6,8 @@ import android.os.Message;
 import android.util.Log;
 
 import com.emagroup.imsdk.response.ImResponse;
-import com.emagroup.imsdk.response.MsgHeartResponse;
+import com.emagroup.imsdk.response.PrivateMsgResponse;
+import com.emagroup.imsdk.response.PublicMsgResponse;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
 import com.emagroup.imsdk.util.MsgQueue;
@@ -35,7 +36,7 @@ public class EmaImSdk {
     private static EmaImSdk instance;
     public String mServerHost;
     private Context mContext;
-    private MsgHeartResponse mHeartResponse;
+    private PublicMsgResponse mHeartResponse;
     private MsgQueue mUnionMsgQueue;
     private MsgQueue mWorldMsgQueue;
     private int mHeartDelay;
@@ -102,7 +103,7 @@ public class EmaImSdk {
      *
      * @param param
      */
-    public void login(HashMap<String, String> param, final ImResponse response) {
+    public void init(final HashMap<String, String> param) {
 
         param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
@@ -110,19 +111,28 @@ public class EmaImSdk {
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
         sign = ConfigUtils.MD5(sign);
         param.put(ImConstants.SIGN, sign);
-        new HttpRequestor().doPostAsync(ImUrl.getLoginUrl(), param, new HttpRequestor.OnResponsetListener() {
+
+        new HttpRequestor().doPostAsync(ImUrl.getLoginUrl(),param, new HttpRequestor.OnResponsetListener() {
             @Override
             public void OnResponse(String result) {
                 try {
 
                     JSONObject jsonObject = new JSONObject(result);
                     int status = jsonObject.getInt("status");
-                    if (0 == status) {
-                        response.onSuccessResponse();
-                    }
                     JSONObject data = jsonObject.getJSONObject("data");
-                    String serverHost = data.getString("host");
-                    mServerHost = serverHost;
+                    mServerHost = data.getString("host");
+
+                    if (0 == status) {
+                        //response.onSuccessResponse();
+                        //开始心跳
+                        HashMap<String, String> heartParam = new HashMap<>();
+                        heartParam.put(ImConstants.SERVER_ID, param.get(ImConstants.SERVER_ID));
+                        heartParam.put(ImConstants.UID, param.get(ImConstants.UID));
+                        heartParam.put(ImConstants.TEAM_ID, param.get(ImConstants.TEAM_ID));
+                        heartParam.put(ImConstants.UNION_ID, param.get(ImConstants.UNION_ID));
+                        heartParam.put(ImConstants.WORLD_ID, param.get(ImConstants.WORLD_ID));
+                        msgHeart(heartParam);
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -166,13 +176,9 @@ public class EmaImSdk {
      * 心跳 获取工会和世界信息
      *
      * @param param
-     * @param response
-     * @param delay
      */
-    public void msgHeart(final HashMap<String, String> param, final MsgHeartResponse response, final int delay) {
+    private void msgHeart(final HashMap<String, String> param) {
 
-        this.mHeartResponse = response;
-        this.mHeartDelay = delay;
         mUnionMsgQueue = new MsgQueue();
         mWorldMsgQueue = new MsgQueue();
 
@@ -184,16 +190,21 @@ public class EmaImSdk {
                 perHeart(param);  //应该搞个handler来说明网络心跳完了才能再执行下面的循环或者直接在下面进行
 
             }
-        }, 0, delay * 1000);
+        }, 0, mHeartDelay * 1000);
+    }
+
+    public void getPublicMsg(PublicMsgResponse publicMsgResponse, int delay) {
+        this.mHeartResponse = publicMsgResponse;
+        this.mHeartDelay = delay;
     }
 
     /**
-     * 发送信息（同时获取聊天信息）
+     * 发送世界或工会信息（同时获取聊天信息）
      *
      * @param param
      * @param response
      */
-    public void sendMsg(final HashMap<String, String> param, final ImResponse response) {
+    public void sendPublicMsg(final HashMap<String, String> param, final ImResponse response) {
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TID) + mAppKey;
@@ -216,13 +227,31 @@ public class EmaImSdk {
     /**
      * 建立长连接
      */
-    public void buildLongConnect(Map<String, String> param,ImResponse response) {
-            param.put(ImConstants.APP_ID,getAppId());
-            param.put(ImConstants.MSG,"i am long connect info");
-            param.put(ImConstants.MSG_ID,System.currentTimeMillis()+"");
+    public void buildLongConnect(Map<String, String> param, ImResponse response) {
+        param.put(ImConstants.APP_ID, getAppId());
+        param.put(ImConstants.MSG, "i am long connect info");
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
-            SocketRunable socketRunable = SocketRunable.getInstance(param,mServerHost, 9999,response);
-            ThreadUtil.runInSubThread(socketRunable);
+        SocketRunable socketRunable = SocketRunable.getInstance();
+        socketRunable.setStartInfo(param, mServerHost, 9999, response);
+        ThreadUtil.runInSubThread(socketRunable);
+    }
+
+    /**
+     * 发送私人或组队聊天（同时获取聊天信息）
+     *
+     * @param param
+     */
+    public void sendPrivateMsg(HashMap<String, String> param) {
+        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+        SocketRunable socketRunable = SocketRunable.getInstance();
+        socketRunable.putStrIntoSocket(new JSONObject(param).toString());
+    }
+
+    public void getPrivateMsg(PrivateMsgResponse privateMsgResponse) {
+        SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
     }
 
     //---------------------------------------------------------------------------------------------

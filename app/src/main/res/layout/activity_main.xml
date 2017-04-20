@@ -4,69 +4,98 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.emagroup.example.MainActivity">
 
     <LinearLayout
-        android:id="@+id/ll_button_group"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/bt_login_server"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="登录服务器" />
-
-        <Button
-            android:id="@+id/bt_update_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="更新信息" />
-
-        <Button
-            android:id="@+id/bt_heart_beat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="心跳" />
-
-        <Button
-            android:id="@+id/bt_send_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="发送信息" />
-
-        <Button
-            android:id="@+id/bt_socket"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="socket" />
-
-        <Button
-            android:id="@+id/bt_clear_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="清屏" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/ll_textview_group"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_weight="3"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_msg"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_button_group"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/bt_init"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="初始化IM" />
+
+            <Button
+                android:id="@+id/bt_update_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="更新信息" />
+
+            <Button
+                android:id="@+id/bt_socket_build"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="建立长连接" />
+
+            <Button
+                android:id="@+id/bt_clear_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清屏" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/et_pub_msg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5" />
+
+            <Button
+                android:id="@+id/bt_send_pub_msg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="发公/世信息" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:layout_weight="5"
+                android:id="@+id/et_pri_msg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:layout_weight="2"
+                android:id="@+id/bt_send_pri_msg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="发私/队消息" />
+        </LinearLayout>
 
     </LinearLayout>
 
