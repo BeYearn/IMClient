@@ -11,8 +11,8 @@ import android.widget.EditText;
 
 import com.emagroup.imsdk.EmaImSdk;
 import com.emagroup.imsdk.ImConstants;
-import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.MsgBean;
+import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.PrivateMsgResponse;
 import com.emagroup.imsdk.response.PublicMsgResponse;
 import com.emagroup.imsdk.util.ToastHelper;
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doInit() {
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.UID, "6");
+        param.put(ImConstants.UID, "8");
         param.put(ImConstants.TEAM_ID, "123");
         param.put(ImConstants.UNION_ID, "c工会");
         param.put(ImConstants.WORLD_ID, "a");
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doUpdate() {
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.UID, "6");
+        param.put(ImConstants.UID, "8");
         param.put(ImConstants.TEAM_ID, "123");
         param.put(ImConstants.UNION_ID, "c工会");
         param.put(ImConstants.WORLD_ID, "a");
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EmaImSdk.getInstance().getPublicMsg(new PublicMsgResponse() {
             @Override
             public void onUnionMsgGet(MsgBean UnionMsgBean) {
-                Log.e("UnionMsg", UnionMsgBean.getMsg());
+                //Log.e("UnionMsg", UnionMsgBean.getMsg());
                 mDataList.add("公会：" + UnionMsgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
                 //mMsgAdapter.notifyItemInserted(mDataList.size());
@@ -116,22 +116,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onWorldMsgGet(MsgBean worldMsgBean) {
-                Log.e("worldMsg", worldMsgBean.getMsg());
+                //Log.e("worldMsg", worldMsgBean.getMsg());
                 mDataList.add("世界：" + worldMsgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
-        }, 5);
+        }, 10);
 
     }
 
     private void doSendPublicMsg() {
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.FUID, "6");
-        param.put(ImConstants.FNAME, "beyearn6");
+        param.put(ImConstants.FUID, "8");
+        param.put(ImConstants.FNAME, "beyearn8");
         param.put(ImConstants.HANDLER, "4");    // 5世界 4工会
         param.put(ImConstants.TID, "c工会");
         param.put(ImConstants.MSG, "beyearnsmsg");
@@ -168,10 +168,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doSendPrivateMsg() {
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.FUID, "6");
-        param.put(ImConstants.FNAME, "beyearn6");
+        param.put(ImConstants.FUID, "8");
+        param.put(ImConstants.FNAME, "beyearn8");
         param.put(ImConstants.HANDLER, "2");    // 2私聊 3队伍
-        param.put(ImConstants.TID, "8");
+        param.put(ImConstants.TID, "283893");
         param.put(ImConstants.MSG, "PrivateMsg");
         EmaImSdk.getInstance().sendPrivateMsg(param);
     }
@@ -179,22 +179,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doGetPrivateMsg() {
         EmaImSdk.getInstance().getPrivateMsg(new PrivateMsgResponse() {
             @Override
-            public void onPersonalMsgGet(MsgBean MsgBean) {
+            public void onPersonalMsgGet(final MsgBean MsgBean) {
                 Log.e("Personal", MsgBean.getMsg());
-                mDataList.add("私聊：" + MsgBean.getMsg());
-                mMsgAdapter.notifyDataSetChanged();
-                //mMsgAdapter.notifyItemInserted(mDataList.size());
-
-                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDataList.add("私聊：" + MsgBean.getMsg());
+                        mMsgAdapter.notifyDataSetChanged();
+                        recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
+                    }
+                });
             }
 
             @Override
-            public void onTeamMsgGet(MsgBean MsgBean) {
+            public void onTeamMsgGet(final MsgBean MsgBean) {
                 Log.e("Team", MsgBean.getMsg());
-                mDataList.add("世界：" + MsgBean.getMsg());
-                mMsgAdapter.notifyDataSetChanged();
-
-                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDataList.add("世界：" + MsgBean.getMsg());
+                        mMsgAdapter.notifyDataSetChanged();
+                        recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
+                    }
+                });
             }
 
         });

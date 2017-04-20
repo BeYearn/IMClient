@@ -36,6 +36,7 @@ public class SocketRunable implements Runnable {
     public static SocketRunable getInstance() {
         if (mInstance == null) {
             mInstance = new SocketRunable();
+            Log.e("newSocketRunable",mInstance.toString());
         }
         return mInstance;
     }
@@ -61,6 +62,12 @@ public class SocketRunable implements Runnable {
             //获取该socket对应的输入流
             mSocketReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             mSocketWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+            //向服务器提交初始信息
+            putStrIntoSocket(new JSONObject(mInfoParam).toString());
+
+            // 第三步开始维持心跳保持连接
+            connectHeart();
 
             //循环不断从socket中读取数据
             String readMsg = null;
@@ -100,12 +107,6 @@ public class SocketRunable implements Runnable {
                 }
             }
 
-            //向服务器提交初始信息
-            putStrIntoSocket(new JSONObject(mInfoParam).toString());
-
-            // 第三步开始维持心跳保持连接
-            connectHeart();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,7 +114,7 @@ public class SocketRunable implements Runnable {
 
     public void putStrIntoSocket(String string) {
         try {
-            mSocketWriter.write(new JSONObject(mInfoParam).toString());
+            mSocketWriter.write(string);
             mSocketWriter.flush();    // 写如记得刷新！！
         } catch (IOException e) {
             e.printStackTrace();

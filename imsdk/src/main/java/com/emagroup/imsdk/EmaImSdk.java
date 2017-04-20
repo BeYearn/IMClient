@@ -50,7 +50,6 @@ public class EmaImSdk {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case EMA_IM_PUT_MSG_OK:
-                    Log.e("heart ok", "ddddddd");
                     pumpMsg(EMA_IM_UNION_MSG, mUnionMsgQueue, mHeartDelay);
                     pumpMsg(EMA_IM_WORLD_MSG, mWorldMsgQueue, mHeartDelay);
                     break;
@@ -263,7 +262,7 @@ public class EmaImSdk {
             public void run() {
                 long msgdelay = (long) ((delay / 10.0) * 1000);
 
-                Log.e("pumpMsg", msgdelay + "");
+                //Log.e("pumpMsg", msgdelay + "");
 
                 MsgBean msgBean = msgQueue.deQueue();
                 while (null != msgBean) {
