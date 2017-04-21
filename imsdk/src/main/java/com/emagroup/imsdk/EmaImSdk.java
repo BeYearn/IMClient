@@ -145,7 +145,7 @@ public class EmaImSdk {
      *
      * @param param
      */
-    public void updateInfo(HashMap<String, String> param, final ImResponse response) {
+    public void updatePubInfo(HashMap<String, String> param, final ImResponse response) {
 
         param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
@@ -251,8 +251,26 @@ public class EmaImSdk {
         socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
 
+    /**
+     * 接收private信息
+     * @param privateMsgResponse
+     */
     public void getPrivateMsg(PrivateMsgResponse privateMsgResponse) {
         SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
+    }
+
+    /**
+     *更新队伍信息
+     */
+    public void updatePriInfo(){
+
+    }
+
+    /**
+     * 停止长连接，退出服务器
+     */
+    public void stop(){
+
     }
 
     //---------------------------------------------------------------------------------------------

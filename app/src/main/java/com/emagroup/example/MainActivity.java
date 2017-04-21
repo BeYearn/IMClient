@@ -128,12 +128,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.UID, mUid);
-        param.put(ImConstants.TEAM_ID, mTeamId);
-        param.put(ImConstants.UNION_ID, mUnionId);
+        param.put(ImConstants.UNION_ID, mUnionId);   // 该就传不改就不穿，短链改这两个，；；；；长链改teamid
         param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().updateInfo(param, new ImResponse() {
+        EmaImSdk.getInstance().updatePubInfo(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
                 ToastHelper.toast(MainActivity.this, "updateInfo success");
