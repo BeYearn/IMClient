@@ -12,12 +12,53 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_msg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_msg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/et_self_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="selfuid"
+                android:text="8" />
+
+            <EditText
+                android:id="@+id/et_world_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="worldid"
+                android:text="a" />
+
+            <EditText
+                android:id="@+id/et_union_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="unionid"
+                android:text="c工会" />
+
+            <EditText
+                android:id="@+id/et_team_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="teamid"
+                android:text="123" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -64,11 +105,28 @@
             android:orientation="horizontal">
 
             <EditText
+                android:id="@+id/et_pub_handler"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:hint="handler"
+                android:text="4" />
+
+            <EditText
+                android:id="@+id/et_pub_id"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:hint="pubid"
+                android:text="c工会" />
+
+            <EditText
                 android:id="@+id/et_pub_msg"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:text="4,100,hahahaha" />
+                android:layout_weight="2"
+                android:hint="msg"
+                android:text="pubms" />
 
             <Button
                 android:id="@+id/bt_send_pub_msg"
@@ -85,11 +143,28 @@
             android:orientation="horizontal">
 
             <EditText
+                android:id="@+id/et_pri_handler"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:hint="handler"
+                android:text="2" />
+
+            <EditText
+                android:id="@+id/et_pri_id"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:hint="pubid"
+                android:text="100" />
+
+            <EditText
                 android:id="@+id/et_pri_msg"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:text="2,100,hahahaha" />
+                android:layout_weight="2"
+                android:hint="msg"
+                android:text="primsg" />
 
             <Button
                 android:id="@+id/bt_send_pri_msg"

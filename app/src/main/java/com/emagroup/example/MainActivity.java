@@ -31,13 +31,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btClearAll;
     private Button btLongConnect;
     private EditText etPriMsg;
-    private View etPubMsg;
+    private EditText etPubMsg;
     private Button btSenfPriMsg;
     private String mServerId;
     private String mUid;
     private String mTeamId;
     private String mUnionId;
     private String mWorldId;
+    private EditText etPubid;
+    private EditText etPubhanler;
+    private EditText etPriid;
+    private EditText etPrihandler;
+    private EditText etSelfId;
+    private EditText etWorldId;
+    private EditText etUnionId;
+    private EditText etTeamId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +62,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
         btLongConnect = (Button) findViewById(R.id.bt_socket_build);
 
+        etSelfId= (EditText) findViewById(R.id.et_self_id);
+        etWorldId= (EditText) findViewById(R.id.et_world_id);
+        etUnionId= (EditText) findViewById(R.id.et_union_id);
+        etTeamId = (EditText) findViewById(R.id.et_team_id);
+
+        etPubMsg = (EditText) findViewById(R.id.et_pub_msg);
+        etPubid = (EditText) findViewById(R.id.et_pub_id);
+        etPubhanler = (EditText) findViewById(R.id.et_pub_handler);
+
         etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
-        etPubMsg = findViewById(R.id.et_pub_msg);
+        etPriid= (EditText) findViewById(R.id.et_pri_id);
+        etPrihandler= (EditText) findViewById(R.id.et_pri_handler);
 
         btLogin.setOnClickListener(this);
         btUpdateInfo.setOnClickListener(this);
@@ -78,12 +96,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
     private void doInit() {
+
+
         mServerId= "01";
-        mUid = "100";
-        mTeamId= "123";
-        mUnionId="c工会";
-        mWorldId = "a";
+        mUid=etSelfId.getText().toString();
+        mTeamId= etTeamId.getText().toString();
+        mUnionId=etUnionId.getText().toString();
+        mWorldId = etWorldId.getText().toString();
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, mServerId);
@@ -98,12 +119,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void doUpdate() {
+
+        mUid=etSelfId.getText().toString();
+        mTeamId= etTeamId.getText().toString();
+        mUnionId=etUnionId.getText().toString();
+        mWorldId = etWorldId.getText().toString();
+
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.UID, "8");
-        param.put(ImConstants.TEAM_ID, "123");
-        param.put(ImConstants.UNION_ID, "c工会");
-        param.put(ImConstants.WORLD_ID, "a");
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.UID, mUid);
+        param.put(ImConstants.TEAM_ID, mTeamId);
+        param.put(ImConstants.UNION_ID, mUnionId);
+        param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
         EmaImSdk.getInstance().updateInfo(param, new ImResponse() {
@@ -141,16 +168,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void doSendPublicMsg() {
 
-        String s = etPriMsg.getText().toString();
-        String[] split = s.split(",");
-
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.FNAME, mUid);
-        param.put(ImConstants.HANDLER, split[0]);    // 5世界 4工会
-        param.put(ImConstants.TID, split[1]);
-        param.put(ImConstants.MSG, split[2]);
+        param.put(ImConstants.HANDLER,etPubhanler.getText().toString());    // 5世界 4工会
+        param.put(ImConstants.TID, etPubid.getText().toString());
+        param.put(ImConstants.MSG, etPubMsg.getText().toString());
         EmaImSdk.getInstance().sendPublicMsg(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
@@ -187,9 +211,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.FNAME, mUid);
-        param.put(ImConstants.HANDLER, split[0]);    // 2私聊 3队伍
-        param.put(ImConstants.TID, split[1]);
-        param.put(ImConstants.MSG, split[2]);
+        param.put(ImConstants.HANDLER, etPrihandler.getText().toString());    // 2私聊 3队伍
+        param.put(ImConstants.TID, etPriid.getText().toString());
+        param.put(ImConstants.MSG, etPriMsg.getText().toString());
         EmaImSdk.getInstance().sendPrivateMsg(param);
     }
 
