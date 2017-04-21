@@ -33,6 +33,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText etPriMsg;
     private View etPubMsg;
     private Button btSenfPriMsg;
+    private String mServerId;
+    private String mUid;
+    private String mTeamId;
+    private String mUnionId;
+    private String mWorldId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btSenfPriMsg = (Button) findViewById(R.id.bt_send_pri_msg);
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
         btLongConnect = (Button) findViewById(R.id.bt_socket_build);
+
         etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
         etPubMsg = findViewById(R.id.et_pub_msg);
 
@@ -73,12 +79,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void doInit() {
+        mServerId= "01";
+        mUid = "100";
+        mTeamId= "123";
+        mUnionId="c工会";
+        mWorldId = "a";
+
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.UID, "8");
-        param.put(ImConstants.TEAM_ID, "123");
-        param.put(ImConstants.UNION_ID, "c工会");
-        param.put(ImConstants.WORLD_ID, "a");
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.UID, mUid);
+        param.put(ImConstants.TEAM_ID, mTeamId);
+        param.put(ImConstants.UNION_ID, mUnionId);
+        param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
         EmaImSdk.getInstance().init(param);
@@ -128,13 +140,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void doSendPublicMsg() {
+
+        String s = etPriMsg.getText().toString();
+        String[] split = s.split(",");
+
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.FUID, "8");
-        param.put(ImConstants.FNAME, "beyearn8");
-        param.put(ImConstants.HANDLER, "4");    // 5世界 4工会
-        param.put(ImConstants.TID, "c工会");
-        param.put(ImConstants.MSG, "beyearnsmsg");
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.FNAME, mUid);
+        param.put(ImConstants.HANDLER, split[0]);    // 5世界 4工会
+        param.put(ImConstants.TID, split[1]);
+        param.put(ImConstants.MSG, split[2]);
         EmaImSdk.getInstance().sendPublicMsg(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
@@ -149,10 +165,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void dobuildConnect() {
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.FUID, "6");
-        param.put(ImConstants.HANDLER, "0");    // 0服务器  1心跳  2私聊 3队伍
-        param.put(ImConstants.TID, "0");
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
         EmaImSdk.getInstance().buildLongConnect(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
@@ -166,13 +180,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 发送私人组队消息
      */
     private void doSendPrivateMsg() {
+        String s = etPriMsg.getText().toString();
+        String[] split = s.split(",");
+
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, "01");
-        param.put(ImConstants.FUID, "8");
-        param.put(ImConstants.FNAME, "beyearn8");
-        param.put(ImConstants.HANDLER, "2");    // 2私聊 3队伍
-        param.put(ImConstants.TID, "283893");
-        param.put(ImConstants.MSG, "PrivateMsg");
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.FNAME, mUid);
+        param.put(ImConstants.HANDLER, split[0]);    // 2私聊 3队伍
+        param.put(ImConstants.TID, split[1]);
+        param.put(ImConstants.MSG, split[2]);
         EmaImSdk.getInstance().sendPrivateMsg(param);
     }
 

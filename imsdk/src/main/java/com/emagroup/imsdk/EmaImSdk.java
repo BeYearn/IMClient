@@ -229,6 +229,8 @@ public class EmaImSdk {
     public void buildLongConnect(Map<String, String> param, ImResponse response) {
         param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.MSG, "i am long connect info");
+        param.put(ImConstants.HANDLER, "0");    // 0服务器  1心跳  2私聊 3队伍
+        param.put(ImConstants.TID, "0");
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         SocketRunable socketRunable = SocketRunable.getInstance();

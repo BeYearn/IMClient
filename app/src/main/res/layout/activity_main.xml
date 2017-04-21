@@ -67,7 +67,8 @@
                 android:id="@+id/et_pub_msg"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5" />
+                android:layout_weight="5"
+                android:text="4,100,hahahaha" />
 
             <Button
                 android:id="@+id/bt_send_pub_msg"
@@ -84,16 +85,17 @@
             android:orientation="horizontal">
 
             <EditText
-                android:layout_weight="5"
                 android:id="@+id/et_pri_msg"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:text="2,100,hahahaha" />
 
             <Button
-                android:layout_weight="2"
                 android:id="@+id/bt_send_pri_msg"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:text="发私/队消息" />
         </LinearLayout>
 
