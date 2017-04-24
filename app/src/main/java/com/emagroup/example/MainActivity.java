@@ -247,6 +247,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private void doUpdatePubInfo(){
+
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.HANDLER, "98"); //退出或加入teamid
+        param.put(ImConstants.TID, "0");  //固定 告诉服务器
+        param.put(ImConstants.MSG, "队伍id");
+        EmaImSdk.getInstance().updatePriInfo(param);
+    }
+
+    private void doStopPriConnect(){
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.HANDLER, "99"); //退出服务器
+        param.put(ImConstants.TID, "0");  //固定 告诉服务器
+        param.put(ImConstants.MSG, "");
+        EmaImSdk.getInstance().stopPriConnect(param);
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -269,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_clear_all:
                 mDataList.clear();
                 mMsgAdapter.notifyDataSetChanged();
+                //doStopPriConnect();
                 break;
         }
 

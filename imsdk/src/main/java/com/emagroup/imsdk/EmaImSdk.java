@@ -260,17 +260,26 @@ public class EmaImSdk {
     }
 
     /**
-     *更新队伍信息
+     *更新队伍信息 改变队伍id 或者退出队伍
+     * @param param
      */
-    public void updatePriInfo(){
+    public void updatePriInfo(HashMap<String, String> param){
+        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
+        SocketRunable socketRunable = SocketRunable.getInstance();
+        socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
 
     /**
      * 停止长连接，退出服务器
+     * @param param
      */
-    public void stop(){
-
+    public void stopPriConnect(HashMap<String, String> param){
+        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+        SocketRunable socketRunable = SocketRunable.getInstance();
+        socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
 
     //---------------------------------------------------------------------------------------------
