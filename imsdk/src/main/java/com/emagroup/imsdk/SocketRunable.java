@@ -1,5 +1,6 @@
 package com.emagroup.imsdk;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.emagroup.imsdk.response.ImResponse;
@@ -49,34 +50,41 @@ public class SocketRunable implements Runnable {
 
     @Override
     public void run() {
-        try {
+        Socket socket = null;
+        int i = 0;
+        while (null == socket) {
+            try {
+                i++;
+                //定义当前线程所处理的Socket
+                socket = new Socket(mHost, mPort);
 
-            //定义当前线程所处理的Socket
-            Socket socket = new Socket(mHost, mPort);
+                //获取该socket对应的输入流
+                ThreadUtil.runInSubThread(new RunableRead(socket.getInputStream(), mResponse, mPrivateMsgResponse));
 
-            //获取该socket对应的输入流
-            ThreadUtil.runInSubThread(new RunableRead(socket.getInputStream(), mResponse, mPrivateMsgResponse));
+                mRunableWrite = new RunableWrite(socket.getOutputStream());
+                ThreadUtil.runInSubThread(mRunableWrite);
 
-            mRunableWrite = new RunableWrite(socket.getOutputStream());
-            ThreadUtil.runInSubThread(mRunableWrite);
+                //向服务器提交初始信息
+                putStrIntoSocket(new JSONObject(mInfoParam).toString());
 
-            //向服务器提交初始信息
-            putStrIntoSocket(new JSONObject(mInfoParam).toString());
-
-            // 第三步开始维持心跳保持连接
-            connectHeart();
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
+                // 第三步开始维持心跳保持连接
+                connectHeart();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("socketRunable", "socket连接失败, 重试中...");
+                if(i>5){
+                    break;
+                }
+                SystemClock.sleep(1000);  //1秒后重连
+            }
         }
     }
 
     public void putStrIntoSocket(String string) {
-        if(null!=mRunableWrite){
+        if (null != mRunableWrite) {
             mRunableWrite.putStrIntoSocket(string);
-        }else {
-            Log.e("Socketrunable","请先建立长连接");
+        } else {
+            Log.e("Socketrunable", "请先建立长连接");
         }
     }
 

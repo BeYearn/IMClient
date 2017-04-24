@@ -18,7 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,14 +33,15 @@ import static com.emagroup.imsdk.ImConstants.EMA_IM_WORLD_MSG;
 public class EmaImSdk {
 
     private static EmaImSdk instance;
-    public String mServerHost;
+    private String mServerHost;
     private Context mContext;
     private PublicMsgResponse mHeartResponse;
     private MsgQueue mUnionMsgQueue;
     private MsgQueue mWorldMsgQueue;
     private int mHeartDelay;
 
-
+    private String mUid;
+    private String mServerId;
     private static String mAppKey;
     private static String mAppId;
 
@@ -88,12 +88,15 @@ public class EmaImSdk {
      * 初始化
      *
      * @param context
+     * @param param
      * @param key
      */
-    public void init(Context context, String key) {
+    public void init(Context context, HashMap<String, String> param, String key) {
         this.mContext = context;
-        this.mAppKey = key;
-        this.mAppId = ConfigUtils.getAppId(mContext);
+        mAppKey = key;
+        mAppId = ConfigUtils.getAppId(mContext);
+        mServerId = param.get(ImConstants.SERVER_ID);
+        mUid = param.get(ImConstants.UID);
         ImUrl.initUrl(context);
     }
 
@@ -102,8 +105,10 @@ public class EmaImSdk {
      *
      * @param param
      */
-    public void init(final HashMap<String, String> param) {
+    public void buildPubConnect(final HashMap<String, String> param) {
 
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.UID, mUid);
         param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
@@ -111,7 +116,7 @@ public class EmaImSdk {
         sign = ConfigUtils.MD5(sign);
         param.put(ImConstants.SIGN, sign);
 
-        new HttpRequestor().doPostAsync(ImUrl.getLoginUrl(),param, new HttpRequestor.OnResponsetListener() {
+        new HttpRequestor().doPostAsync(ImUrl.getLoginUrl(), param, new HttpRequestor.OnResponsetListener() {
             @Override
             public void OnResponse(String result) {
                 try {
@@ -147,6 +152,8 @@ public class EmaImSdk {
      */
     public void updatePubInfo(HashMap<String, String> param, final ImResponse response) {
 
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.UID, mUid);
         param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
@@ -192,7 +199,7 @@ public class EmaImSdk {
         }, 0, mHeartDelay * 1000);
     }
 
-    public void getPublicMsg(PublicMsgResponse publicMsgResponse, int delay) {
+    public void getPubMsg(PublicMsgResponse publicMsgResponse, int delay) {
         this.mHeartResponse = publicMsgResponse;
         this.mHeartDelay = delay;
     }
@@ -203,7 +210,9 @@ public class EmaImSdk {
      * @param param
      * @param response
      */
-    public void sendPublicMsg(final HashMap<String, String> param, final ImResponse response) {
+    public void sendPubMsg(final HashMap<String, String> param, final ImResponse response) {
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TID) + mAppKey;
@@ -226,7 +235,10 @@ public class EmaImSdk {
     /**
      * 建立长连接
      */
-    public void buildLongConnect(Map<String, String> param, ImResponse response) {
+    public void buildPriConnect(ImResponse response) {
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, getAppId());
         param.put(ImConstants.MSG, "i am long connect info");
         param.put(ImConstants.HANDLER, "0");    // 0服务器  1心跳  2私聊 3队伍
@@ -243,7 +255,9 @@ public class EmaImSdk {
      *
      * @param param
      */
-    public void sendPrivateMsg(HashMap<String, String> param) {
+    public void sendPriMsg(HashMap<String, String> param) {
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
@@ -253,19 +267,24 @@ public class EmaImSdk {
 
     /**
      * 接收private信息
+     *
      * @param privateMsgResponse
      */
-    public void getPrivateMsg(PrivateMsgResponse privateMsgResponse) {
+    public void getPriMsg(PrivateMsgResponse privateMsgResponse) {
         SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
     }
 
     /**
-     *更新队伍信息 改变队伍id 或者退出队伍
+     * 更新队伍信息 改变队伍id 或者退出队伍
+     *
      * @param param
      */
-    public void updatePriInfo(HashMap<String, String> param){
+    public void updateTeamInfo(HashMap<String, String> param) {
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+        param.put(ImConstants.HANDLER, "98"); //退出或加入teamid
 
         SocketRunable socketRunable = SocketRunable.getInstance();
         socketRunable.putStrIntoSocket(new JSONObject(param).toString());
@@ -273,11 +292,17 @@ public class EmaImSdk {
 
     /**
      * 停止长连接，退出服务器
-     * @param param
      */
-    public void stopPriConnect(HashMap<String, String> param){
+    public void stopPriConnect() {
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.TID, "0");  //固定 告诉服务器
+        param.put(ImConstants.MSG, "");
+        param.put(ImConstants.SERVER_ID, mServerId);
+        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+        param.put(ImConstants.HANDLER, "99"); //退出服务器
+
         SocketRunable socketRunable = SocketRunable.getInstance();
         socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }

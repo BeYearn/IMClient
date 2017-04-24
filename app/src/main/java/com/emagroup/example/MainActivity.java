@@ -52,9 +52,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EmaImSdk.getInstance().init(this, "a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
-
-
         btLogin = (Button) findViewById(R.id.bt_init);
         btUpdateInfo = (Button) findViewById(R.id.bt_update_info);
         btSendPubMsg = (Button) findViewById(R.id.bt_send_pub_msg);
@@ -91,15 +88,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recylerMsg.setAdapter(mMsgAdapter);
 
 
-        doGetPublicMsg();
-        doGetPrivateMsg();
-    }
-
-
-
-    private void doInit() {
-
-
         mServerId= "01";
         mUid=etSelfId.getText().toString();
         mTeamId= etTeamId.getText().toString();
@@ -109,12 +97,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.UID, mUid);
+        EmaImSdk.getInstance().init(this, param,"a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
+
+        doGetPublicMsg();
+        doGetPrivateMsg();
+    }
+
+
+
+    private void dobuildPubConnect() {
+
+        HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.TEAM_ID, mTeamId);
         param.put(ImConstants.UNION_ID, mUnionId);
         param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().init(param);
+        EmaImSdk.getInstance().buildPubConnect(param);
     }
 
 
@@ -126,8 +125,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mWorldId = etWorldId.getText().toString();
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.UID, mUid);
         param.put(ImConstants.UNION_ID, mUnionId);   // 该就传不改就不穿，短链改这两个，；；；；长链改teamid
         param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
@@ -141,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void doGetPublicMsg() {
-        EmaImSdk.getInstance().getPublicMsg(new PublicMsgResponse() {
+        EmaImSdk.getInstance().getPubMsg(new PublicMsgResponse() {
             @Override
             public void onUnionMsgGet(MsgBean UnionMsgBean) {
                 //Log.e("UnionMsg", UnionMsgBean.getMsg());
@@ -168,13 +165,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doSendPublicMsg() {
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.FNAME, mUid);
         param.put(ImConstants.HANDLER,etPubhanler.getText().toString());    // 5世界 4工会
         param.put(ImConstants.TID, etPubid.getText().toString());
         param.put(ImConstants.MSG, etPubMsg.getText().toString());
-        EmaImSdk.getInstance().sendPublicMsg(param, new ImResponse() {
+        EmaImSdk.getInstance().sendPubMsg(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
                 ToastHelper.toast(MainActivity.this, "send msg success");
@@ -187,13 +182,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 队伍私聊前建立长连接
      */
     private void dobuildConnect() {
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        EmaImSdk.getInstance().buildLongConnect(param, new ImResponse() {
+        EmaImSdk.getInstance().buildPriConnect(new ImResponse() {
             @Override
             public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this, "send buildLongConnect success");
+                ToastHelper.toast(MainActivity.this, "buildLongConnect success");
             }
         });
     }
@@ -207,17 +199,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String[] split = s.split(",");
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.FNAME, mUid);
         param.put(ImConstants.HANDLER, etPrihandler.getText().toString());    // 2私聊 3队伍
         param.put(ImConstants.TID, etPriid.getText().toString());
         param.put(ImConstants.MSG, etPriMsg.getText().toString());
-        EmaImSdk.getInstance().sendPrivateMsg(param);
+        EmaImSdk.getInstance().sendPriMsg(param);
     }
 
     private void doGetPrivateMsg() {
-        EmaImSdk.getInstance().getPrivateMsg(new PrivateMsgResponse() {
+        EmaImSdk.getInstance().getPriMsg(new PrivateMsgResponse() {
             @Override
             public void onPersonalMsgGet(final MsgBean MsgBean) {
                 Log.e("Personal", MsgBean.getMsg());
@@ -250,22 +240,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doUpdatePubInfo(){
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.HANDLER, "98"); //退出或加入teamid
         param.put(ImConstants.TID, "0");  //固定 告诉服务器
         param.put(ImConstants.MSG, "队伍id");
-        EmaImSdk.getInstance().updatePriInfo(param);
+        EmaImSdk.getInstance().updateTeamInfo(param);
     }
 
     private void doStopPriConnect(){
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.HANDLER, "99"); //退出服务器
-        param.put(ImConstants.TID, "0");  //固定 告诉服务器
-        param.put(ImConstants.MSG, "");
-        EmaImSdk.getInstance().stopPriConnect(param);
+        EmaImSdk.getInstance().stopPriConnect();
     }
 
 
@@ -273,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bt_init:
-                doInit();
+                dobuildPubConnect();
                 break;
             case R.id.bt_update_info:
                 doUpdate();
