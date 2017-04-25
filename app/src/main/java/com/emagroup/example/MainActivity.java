@@ -171,12 +171,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         param.put(ImConstants.HANDLER,etPubhanler.getText().toString());    // 5世界 4工会
         param.put(ImConstants.TID, etPubid.getText().toString());
         param.put(ImConstants.MSG, etPubMsg.getText().toString());
-        EmaImSdk.getInstance().sendPubMsg(param, new ImResponse() {
-            @Override
-            public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this, "send msg success");
-            }
-        });
+        EmaImSdk.getInstance().sendPubMsg(param);
     }
 
 

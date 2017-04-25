@@ -177,28 +177,12 @@ public class EmaImSdk {
         });
     }
 
-
     /**
-     * 心跳 获取工会和世界信息
+     * 获取世界、工会消息
      *
-     * @param param
+     * @param publicMsgResponse
+     * @param delay
      */
-    private void msgHeart(final HashMap<String, String> param) {
-
-        mUnionMsgQueue = new MsgQueue();
-        mWorldMsgQueue = new MsgQueue();
-
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-
-                perHeart(param);  //应该搞个handler来说明网络心跳完了才能再执行下面的循环或者直接在下面进行
-
-            }
-        }, 0, mHeartDelay * 1000);
-    }
-
     public void getPubMsg(PublicMsgResponse publicMsgResponse, int delay) {
         this.mHeartResponse = publicMsgResponse;
         this.mHeartDelay = delay;
@@ -208,9 +192,8 @@ public class EmaImSdk {
      * 发送世界或工会信息（同时获取聊天信息）
      *
      * @param param
-     * @param response
      */
-    public void sendPubMsg(final HashMap<String, String> param, final ImResponse response) {
+    public void sendPubMsg(final HashMap<String, String> param) {
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
@@ -308,6 +291,28 @@ public class EmaImSdk {
     }
 
     //---------------------------------------------------------------------------------------------
+
+    /**
+     * 心跳 获取工会和世界信息
+     *
+     * @param param
+     */
+    private void msgHeart(final HashMap<String, String> param) {
+
+        mUnionMsgQueue = new MsgQueue();
+        mWorldMsgQueue = new MsgQueue();
+
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                perHeart(param);  //应该搞个handler来说明网络心跳完了才能再执行下面的循环或者直接在下面进行
+
+            }
+        }, 0, mHeartDelay * 1000);
+    }
+
 
     private void pumpMsg(final int type, final MsgQueue msgQueue, final int delay) {
 
