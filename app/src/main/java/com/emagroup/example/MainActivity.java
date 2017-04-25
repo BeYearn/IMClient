@@ -87,6 +87,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mMsgAdapter = new MsgAdapter(mDataList);
         recylerMsg.setAdapter(mMsgAdapter);
 
+        doGetPublicMsg();
+        doGetPrivateMsg();
+    }
+
+
+
+    private void doInitAndbuildPubConnect() {
+
 
         mServerId= "01";
         mUid=etSelfId.getText().toString();
@@ -94,18 +102,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mUnionId=etUnionId.getText().toString();
         mWorldId = etWorldId.getText().toString();
 
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.UID, mUid);
-        EmaImSdk.getInstance().init(this, param,"a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
-
-        doGetPublicMsg();
-        doGetPrivateMsg();
-    }
+        HashMap<String, String> paramInit = new HashMap<>();
+        paramInit.put(ImConstants.SERVER_ID, mServerId);
+        paramInit.put(ImConstants.UID, mUid);
+        EmaImSdk.getInstance().init(this, paramInit,"a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
 
 
-
-    private void dobuildPubConnect() {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.TEAM_ID, mTeamId);
@@ -254,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bt_init:
-                dobuildPubConnect();
+                doInitAndbuildPubConnect();
                 break;
             case R.id.bt_update_info:
                 doUpdate();
