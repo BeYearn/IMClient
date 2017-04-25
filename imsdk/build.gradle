@@ -19,7 +19,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+}
+
+task createFatjar(type: JavaExec) {  //https://github.com/xinshoucb/fatjar
+    javaexec {
+        main = "-jar";
+        args = ["fatjar_0818.jar"];
+    }
 }
 
 dependencies {
+    compile files('libs/rxjava-1.1.1.jar')
+    compile files('libs/rxandroid-1.1.0.jar')
+    compile files('libs/retrofit-2.0.0.jar')
 }

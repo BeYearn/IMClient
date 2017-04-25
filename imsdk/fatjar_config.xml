@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+    <jars>
+		<jar path="C:\\Users\\Administrator\\Desktop\\rxandroid-1.1.0.jar"/>
+		<jar path="C:\\Users\\Administrator\\Desktop\\rxjava-1.1.1.jar"/>
+	</jars>
+	
+	<!--<assets path="C:\\Users\\Administrator\\Desktop\\fatjar\\assets"/>-->
+</files>
