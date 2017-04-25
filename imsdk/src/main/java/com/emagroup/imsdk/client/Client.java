@@ -4,13 +4,27 @@ package com.emagroup.imsdk.client;
 import android.content.Context;
 import android.util.Log;
 
+import com.emagroup.imsdk.ImConstants;
+import com.emagroup.imsdk.MsgBean;
+import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.PrivateMsgResponse;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -18,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class Client {
 
+    private static Client mInstance;
     private final int STATE_OPEN = 1;//socket打开
     private final int STATE_CLOSE = 1 << 1;//socket关闭
     private final int STATE_CONNECT_START = 1 << 2;//开始连接server
@@ -31,18 +46,47 @@ public class Client {
     private int state = STATE_CONNECT_START;
 
     private Socket socket = null;
-    private OutputStream outStream = null;
-    private InputStream inStream = null;
+    //private OutputStream outStream = null;
+    //private InputStream inStream = null;
+
+    private BufferedReader reader;
+    private BufferedWriter writer;
 
     private Thread conn = null;
+
     private Thread send = null;
     private Thread rec = null;
-
     private Context context;
-    private ISocketResponse respListener;
+    private ImResponse respListener;
     private LinkedBlockingQueue<Packet> requestQueen = new LinkedBlockingQueue<Packet>();
     private final Object lock = new Object();
     private final String TAG = "Client";
+    private PrivateMsgResponse onGetPriMsg;
+    private HashMap<String, String> mInfoParam;
+
+
+    public static Client getInstance() {
+        if (mInstance == null) {
+            mInstance = new Client();
+            Log.e("newSocketRunable", mInstance.toString());
+        }
+        return mInstance;
+    }
+
+    private Client() {
+    }
+
+
+    public void setInitRe(Context mContext, ImResponse response, HashMap<String, String> param) {
+        this.context = mContext;
+        this.respListener = response;
+        this.mInfoParam = param;
+    }
+
+    public void setOnGetPriMsg(PrivateMsgResponse onGetPriMsg) {
+        this.onGetPriMsg = onGetPriMsg;
+    }
+
 
     public int send(Packet in) {
         requestQueen.add(in);
@@ -60,11 +104,6 @@ public class Client {
                 mIterator.remove();
             }
         }
-    }
-
-    public Client(Context context, ISocketResponse respListener) {
-        this.context = context;
-        this.respListener = respListener;
     }
 
     public boolean isNeedConn() {
@@ -109,23 +148,23 @@ public class Client {
                 }
 
                 try {
-                    if (null != outStream) {
-                        outStream.close();
+                    if (null != writer) {
+                        writer.close();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    outStream = null;
+                    writer = null;
                 }
 
                 try {
-                    if (null != inStream) {
-                        inStream.close();
+                    if (null != reader) {
+                        reader.close();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    inStream = null;
+                    reader = null;
                 }
 
                 try {
@@ -166,6 +205,7 @@ public class Client {
         }
     }
 
+
     private class Conn implements Runnable {
         public void run() {
             Log.v(TAG, "Conn :Start");
@@ -183,8 +223,10 @@ public class Client {
 
                     if (state == STATE_CONNECT_SUCCESS) {
                         try {
-                            outStream = socket.getOutputStream();
-                            inStream = socket.getInputStream();
+                            OutputStream outStream = socket.getOutputStream();
+                            InputStream inStream = socket.getInputStream();
+                            writer = new BufferedWriter(new OutputStreamWriter(outStream));
+                            reader = new BufferedReader(new InputStreamReader(inStream));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -201,9 +243,9 @@ public class Client {
                             try {
                                 Thread.sleep(15 * 1000);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
-                                break;
-                            }
+                            e.printStackTrace();
+                            break;
+                        }
                         } else {
                             break;
                         }
@@ -221,11 +263,11 @@ public class Client {
         public void run() {
             Log.v(TAG, "Send :Start");
             try {
-                while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != outStream) {
+                while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != writer) {
                     Packet item;
                     while (null != (item = requestQueen.poll())) {
-                        outStream.write(item.getPacket());
-                        outStream.flush();
+                        writer.write(item.getData());
+                        writer.flush();
                         item = null;
                     }
 
@@ -252,26 +294,53 @@ public class Client {
             Log.v(TAG, "Rec :Start");
 
             try {
-                while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != inStream) {
+                while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != reader) {
                     Log.v(TAG, "Rec :---------");
-                    byte[] bodyBytes = new byte[5];
-                    int offset = 0;
-                    int length = 5;
-                    int read = 0;
+                    String str = null;
+                    while ((str = reader.readLine()) != null) {    //误以为readLine()是读取到没有数据时就返回null(因为其它read方法当读到没有数据时返回-1)，而实际上readLine()是一个阻塞函数，当没有数据读取时，就一直会阻塞在那，而不是返回null；readLine()只有在数据流发生异常或者另一端被close()掉时，才会返回null值。
+                        if (null != respListener) {
 
-                    while ((read = inStream.read(bodyBytes, offset, length)) > 0) {
-                        if (length - read == 0) {
-                            if (null != respListener) {
-                                respListener.onSocketResponse(new String(bodyBytes));
+                            JSONObject strFromSocket = new JSONObject(str);
+
+                            MsgBean msgBean = new MsgBean();
+                            msgBean.setAppId(strFromSocket.getString("appId"));
+                            msgBean.setfName(strFromSocket.getString("fName"));
+                            msgBean.setFuid(strFromSocket.getString("fUid"));
+                            msgBean.setHandler(strFromSocket.getString("handler"));
+                            msgBean.setMsg(strFromSocket.getString("msg"));
+                            msgBean.setMsgId(strFromSocket.getString("msgId"));
+                            msgBean.setServerId(strFromSocket.getString("serverId"));
+                            msgBean.settID(strFromSocket.getString("tId"));
+
+                            switch (Integer.parseInt(msgBean.getHandler())) {
+
+                                case 0: //socket建立成功后受到服务器信息
+
+                                    //向服务器提交初始信息
+                                    send(new Packet(new JSONObject(mInfoParam).toString()));
+
+                                    break;
+                                case 96: //提交初始信息后服务器返会
+
+                                    respListener.onSuccessResponse();//连接成功回调
+
+                                    // 第三步开始维持心跳保持连接
+                                    connectHeart();
+
+                                    break;
+                                case 1:  // 心跳的回应
+                                    Log.e("socketHeart", str);
+                                    break;
+                                case 2:  //1-1收到的消息
+                                    onGetPriMsg.onPersonalMsgGet(msgBean);
+                                    break;
+                                case 3:  //组队收到的消息
+                                    onGetPriMsg.onTeamMsgGet(msgBean);
+                                    break;
                             }
 
-                            offset = 0;
-                            length = 5;
-                            read = 0;
-                            continue;
+                            // respListener.onSocketResponse(str);
                         }
-                        offset += read;
-                        length = 5 - offset;
                     }
 
                     reconn();//走到这一步，说明服务器socket断了
@@ -286,5 +355,30 @@ public class Client {
 
             Log.v(TAG, "Rec :End");
         }
+    }
+
+    private void connectHeart() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                HashMap<String, String> heartParam = new HashMap<>();
+                heartParam.put(ImConstants.APP_ID, mInfoParam.get(ImConstants.APP_ID));
+                heartParam.put(ImConstants.SERVER_ID, mInfoParam.get(ImConstants.SERVER_ID));
+                heartParam.put(ImConstants.FUID, mInfoParam.get(ImConstants.FUID));
+                heartParam.put(ImConstants.HANDLER, "1");
+                heartParam.put(ImConstants.TID, "0"); // 固定
+                heartParam.put(ImConstants.MSG, "heart beat");
+                heartParam.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+                try {
+                    String heartMsg = new JSONObject(heartParam).toString();
+                    send(new Packet(heartMsg));
+                    Log.e("socketHeartBeat", heartMsg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 20 * 1000);
     }
 }

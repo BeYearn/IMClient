@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.emagroup.imsdk.client.Client;
+import com.emagroup.imsdk.client.Packet;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.PrivateMsgResponse;
 import com.emagroup.imsdk.response.PublicMsgResponse;
@@ -228,9 +230,13 @@ public class EmaImSdk {
         param.put(ImConstants.TID, "0");
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
-        SocketRunable socketRunable = SocketRunable.getInstance();
-        socketRunable.setStartInfo(param, mServerHost, 9999, response);
-        ThreadUtil.runInSubThread(socketRunable);
+        Client client = Client.getInstance();
+        client.setInitRe(mContext,response,param);
+        client.open(mServerHost,9999);
+
+        //SocketRunable socketRunable = SocketRunable.getInstance();
+        //socketRunable.setStartInfo(param, mServerHost, 9999, response);
+        //ThreadUtil.runInSubThread(socketRunable);
     }
 
     /**
@@ -244,8 +250,12 @@ public class EmaImSdk {
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
-        SocketRunable socketRunable = SocketRunable.getInstance();
-        socketRunable.putStrIntoSocket(new JSONObject(param).toString());
+        Client client = Client.getInstance();
+        Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet);
+        //SocketRunable socketRunable = SocketRunable.getInstance();
+        //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
 
     /**
@@ -254,7 +264,9 @@ public class EmaImSdk {
      * @param privateMsgResponse
      */
     public void getPriMsg(PrivateMsgResponse privateMsgResponse) {
-        SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
+        Client client = Client.getInstance();
+        client.setOnGetPriMsg(privateMsgResponse);
+        //SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
     }
 
     /**
@@ -269,8 +281,12 @@ public class EmaImSdk {
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         param.put(ImConstants.HANDLER, "98"); //退出或加入teamid
 
-        SocketRunable socketRunable = SocketRunable.getInstance();
-        socketRunable.putStrIntoSocket(new JSONObject(param).toString());
+        Client client = Client.getInstance();
+        Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet);
+        //SocketRunable socketRunable = SocketRunable.getInstance();
+        //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
 
     /**
@@ -286,8 +302,12 @@ public class EmaImSdk {
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         param.put(ImConstants.HANDLER, "99"); //退出服务器
 
-        SocketRunable socketRunable = SocketRunable.getInstance();
-        socketRunable.putStrIntoSocket(new JSONObject(param).toString());
+        Client client = Client.getInstance();
+        Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet);
+        //SocketRunable socketRunable = SocketRunable.getInstance();
+        //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
 
     //---------------------------------------------------------------------------------------------
