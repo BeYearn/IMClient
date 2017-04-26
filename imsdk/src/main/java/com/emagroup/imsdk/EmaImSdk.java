@@ -59,7 +59,9 @@ public class EmaImSdk {
                     MsgBean msgBean = (MsgBean) msg.obj;
                     int type = msg.arg1;
                     if (null != msgBean) {
-                        if (type == EMA_IM_UNION_MSG) {
+                        if (mHeartResponse == null) {
+                            return;
+                        } else if (type == EMA_IM_UNION_MSG) {
                             mHeartResponse.onUnionMsgGet(msgBean);
                         } else if (type == EMA_IM_WORLD_MSG) {
                             mHeartResponse.onWorldMsgGet(msgBean);
@@ -105,13 +107,15 @@ public class EmaImSdk {
     /**
      * 登录服务器
      *
-     * @param param
+     * @param delay 心跳的频率  秒
      */
-    public void buildPubConnect(final HashMap<String, String> param) {
+    public void buildPubConnect(final HashMap<String, String> param, int delay) {
+
+        this.mHeartDelay = delay;
 
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.UID, mUid);
-        param.put(ImConstants.APP_ID, getAppId());
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
@@ -129,14 +133,14 @@ public class EmaImSdk {
                     mServerHost = data.getString("host");
 
                     if (0 == status) {
-                        //response.onSuccessResponse();
-                        //开始心跳
+
                         HashMap<String, String> heartParam = new HashMap<>();
                         heartParam.put(ImConstants.SERVER_ID, param.get(ImConstants.SERVER_ID));
                         heartParam.put(ImConstants.UID, param.get(ImConstants.UID));
-                        heartParam.put(ImConstants.TEAM_ID, param.get(ImConstants.TEAM_ID));
                         heartParam.put(ImConstants.UNION_ID, param.get(ImConstants.UNION_ID));
                         heartParam.put(ImConstants.WORLD_ID, param.get(ImConstants.WORLD_ID));
+
+                        //开始心跳
                         msgHeart(heartParam);
                     }
 
@@ -156,7 +160,7 @@ public class EmaImSdk {
 
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.UID, mUid);
-        param.put(ImConstants.APP_ID, getAppId());
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
@@ -183,11 +187,9 @@ public class EmaImSdk {
      * 获取世界、工会消息
      *
      * @param publicMsgResponse
-     * @param delay
      */
-    public void getPubMsg(PublicMsgResponse publicMsgResponse, int delay) {
+    public void getPubMsg(PublicMsgResponse publicMsgResponse) {
         this.mHeartResponse = publicMsgResponse;
-        this.mHeartDelay = delay;
     }
 
     /**
@@ -198,7 +200,7 @@ public class EmaImSdk {
     public void sendPubMsg(final HashMap<String, String> param) {
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TID) + mAppKey;
         sign = ConfigUtils.MD5(sign);
@@ -224,15 +226,15 @@ public class EmaImSdk {
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, getAppId());
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.MSG, "i am long connect info");
         param.put(ImConstants.HANDLER, "0");    // 0服务器  1心跳  2私聊 3队伍
         param.put(ImConstants.TID, "0");
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         Client client = Client.getInstance();
-        client.setInitRe(mContext,response,param);
-        client.open(mServerHost,9999);
+        client.setInitRe(mContext, response, param);
+        client.open(mServerHost, 9999);
 
         //SocketRunable socketRunable = SocketRunable.getInstance();
         //socketRunable.setStartInfo(param, mServerHost, 9999, response);
@@ -247,13 +249,14 @@ public class EmaImSdk {
     public void sendPriMsg(HashMap<String, String> param) {
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         Client client = Client.getInstance();
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
         client.send(packet);
+
         //SocketRunable socketRunable = SocketRunable.getInstance();
         //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
@@ -264,6 +267,7 @@ public class EmaImSdk {
      * @param privateMsgResponse
      */
     public void getPriMsg(PrivateMsgResponse privateMsgResponse) {
+
         Client client = Client.getInstance();
         client.setOnGetPriMsg(privateMsgResponse);
         //SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
@@ -275,11 +279,13 @@ public class EmaImSdk {
      * @param param
      */
     public void updateTeamInfo(HashMap<String, String> param) {
+
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         param.put(ImConstants.HANDLER, "98"); //退出或加入teamid
+        param.put(ImConstants.TID, "0");  //固定 告诉服务器
 
         Client client = Client.getInstance();
         Packet packet = new Packet();
@@ -298,7 +304,7 @@ public class EmaImSdk {
         param.put(ImConstants.MSG, "");
         param.put(ImConstants.SERVER_ID, mServerId);
         param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
         param.put(ImConstants.HANDLER, "99"); //退出服务器
 
@@ -306,6 +312,8 @@ public class EmaImSdk {
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
         client.send(packet);
+
+        client.close();
         //SocketRunable socketRunable = SocketRunable.getInstance();
         //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
     }
@@ -362,7 +370,7 @@ public class EmaImSdk {
     }
 
     private void perHeart(HashMap<String, String> param) {
-        param.put(ImConstants.APP_ID, getAppId());
+        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
 
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
@@ -424,19 +432,6 @@ public class EmaImSdk {
             e.printStackTrace();
         }
         return msgBean;
-    }
-
-
-    public String getAppKey() {
-        return mAppKey;
-    }
-
-    public String getAppId() {
-        return mAppId;
-    }
-
-    public String getServerHost() {
-        return mServerHost;
     }
 
 }

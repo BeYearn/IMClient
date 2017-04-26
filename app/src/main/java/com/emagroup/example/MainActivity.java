@@ -87,8 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mMsgAdapter = new MsgAdapter(mDataList);
         recylerMsg.setAdapter(mMsgAdapter);
 
-        doGetPublicMsg();
-        doGetPrivateMsg();
+
     }
 
 
@@ -102,20 +101,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mUnionId=etUnionId.getText().toString();
         mWorldId = etWorldId.getText().toString();
 
+
+        //初始化
         HashMap<String, String> paramInit = new HashMap<>();
         paramInit.put(ImConstants.SERVER_ID, mServerId);
         paramInit.put(ImConstants.UID, mUid);
         EmaImSdk.getInstance().init(this, paramInit,"a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
 
 
-
+        //建立工会、世界的连接
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.TEAM_ID, mTeamId);
-        param.put(ImConstants.UNION_ID, mUnionId);
+        param.put(ImConstants.UNION_ID, mUnionId);   // 没有就传 ""
         param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
-        EmaImSdk.getInstance().buildPubConnect(param);
+        EmaImSdk.getInstance().buildPubConnect(param, 10);
     }
 
 
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mWorldId = etWorldId.getText().toString();
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.UNION_ID, mUnionId);   // 该就传不改就不穿，短链改这两个，；；；；长链改teamid
+        param.put(ImConstants.UNION_ID, mUnionId);   // 改哪个传那个，短链改这两个
         param.put(ImConstants.WORLD_ID, mWorldId);
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
@@ -143,24 +143,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EmaImSdk.getInstance().getPubMsg(new PublicMsgResponse() {
             @Override
             public void onUnionMsgGet(MsgBean UnionMsgBean) {
-                //Log.e("UnionMsg", UnionMsgBean.getMsg());
+
                 mDataList.add("公会：" + UnionMsgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
-                //mMsgAdapter.notifyItemInserted(mDataList.size());
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
             @Override
             public void onWorldMsgGet(MsgBean worldMsgBean) {
-                //Log.e("worldMsg", worldMsgBean.getMsg());
+
                 mDataList.add("世界：" + worldMsgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
-        }, 10);
+        });
 
     }
 
@@ -234,11 +233,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void doUpdatePubInfo(){
+    private void doupdateTeamInfo(){
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.TID, "0");  //固定 告诉服务器
         param.put(ImConstants.MSG, "队伍id");
+
         EmaImSdk.getInstance().updateTeamInfo(param);
     }
 
@@ -266,9 +265,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doSendPrivateMsg();
                 break;
             case R.id.bt_clear_all:
-                mDataList.clear();
-                mMsgAdapter.notifyDataSetChanged();
+                //mDataList.clear();
+                //mMsgAdapter.notifyDataSetChanged();
+
                 //doStopPriConnect();
+
+                doGetPublicMsg();
+                doGetPrivateMsg();
                 break;
         }
 

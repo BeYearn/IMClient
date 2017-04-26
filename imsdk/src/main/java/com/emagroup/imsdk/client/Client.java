@@ -58,7 +58,7 @@ public class Client {
     private Thread rec = null;
     private Context context;
     private ImResponse respListener;
-    private LinkedBlockingQueue<Packet> requestQueen = new LinkedBlockingQueue<Packet>();
+    private LinkedBlockingQueue<Packet> requestQueen = new LinkedBlockingQueue<>();
     private final Object lock = new Object();
     private final String TAG = "Client";
     private PrivateMsgResponse onGetPriMsg;
@@ -214,7 +214,7 @@ public class Client {
                     try {
                         state = STATE_CONNECT_START;
                         socket = new Socket();
-                        socket.connect(new InetSocketAddress(IP, PORT), 15 * 1000);
+                        socket.connect(new InetSocketAddress(IP, PORT), 10 * 1000);
                         state = STATE_CONNECT_SUCCESS;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -233,19 +233,20 @@ public class Client {
 
                         send = new Thread(new Send());
                         rec = new Thread(new Rec());
+
                         send.start();
                         rec.start();
                         break;
                     } else {
                         state = STATE_CONNECT_WAIT;
-                        //如果有网络没有连接上，则定时取连接，没有网络则直接退出
+                        //如果有网络没有连接上，则定时去连接，没有网络则直接退出
                         if (NetworkUtil.isNetworkAvailable(context)) {
                             try {
                                 Thread.sleep(15 * 1000);
                             } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            break;
-                        }
+                                e.printStackTrace();
+                                break;
+                            }
                         } else {
                             break;
                         }
