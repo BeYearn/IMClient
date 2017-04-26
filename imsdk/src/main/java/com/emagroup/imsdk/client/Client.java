@@ -63,6 +63,7 @@ public class Client {
     private final String TAG = "Client";
     private PrivateMsgResponse onGetPriMsg;
     private HashMap<String, String> mInfoParam;
+    private Timer mHeartTimer;
 
 
     public static Client getInstance() {
@@ -145,6 +146,14 @@ public class Client {
                     e.printStackTrace();
                 } finally {
                     socket = null;
+                }
+
+                try {
+                    if(null!=mHeartTimer){     //心跳的停止
+                        mHeartTimer.cancel();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
 
                 try {
@@ -330,7 +339,7 @@ public class Client {
 
                                     break;
                                 case 1:  // 心跳的回应
-                                    Log.e("socketHeart", str);
+                                    Log.e("socketHeartRe", str);
                                     break;
                                 case 2:  //1-1收到的消息
                                     onGetPriMsg.onPersonalMsgGet(msgBean);
@@ -359,8 +368,8 @@ public class Client {
     }
 
     private void connectHeart() {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        mHeartTimer = new Timer();
+        mHeartTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 HashMap<String, String> heartParam = new HashMap<>();
@@ -375,7 +384,7 @@ public class Client {
                 try {
                     String heartMsg = new JSONObject(heartParam).toString();
                     send(new Packet(heartMsg));
-                    Log.e("socketHeartBeat", heartMsg);
+                    Log.e("socketHeartContent", heartMsg);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

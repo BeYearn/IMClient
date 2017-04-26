@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText etWorldId;
     private EditText etUnionId;
     private EditText etTeamId;
+    private Button btStopLongCnt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,12 +73,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etPriid= (EditText) findViewById(R.id.et_pri_id);
         etPrihandler= (EditText) findViewById(R.id.et_pri_handler);
 
+        btStopLongCnt= (Button) findViewById(R.id.bt_stop_long_cnt);
+
         btLogin.setOnClickListener(this);
         btUpdateInfo.setOnClickListener(this);
         btSendPubMsg.setOnClickListener(this);
         btSenfPriMsg.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
         btLongConnect.setOnClickListener(this);
+        btStopLongCnt.setOnClickListener(this);
 
         recylerMsg = (RecyclerView) findViewById(R.id.recycler_msg);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -88,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recylerMsg.setAdapter(mMsgAdapter);
 
 
+        doGetPublicMsg();
+        doGetPrivateMsg();
     }
 
 
@@ -265,13 +271,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doSendPrivateMsg();
                 break;
             case R.id.bt_clear_all:
-                //mDataList.clear();
-                //mMsgAdapter.notifyDataSetChanged();
-
-                //doStopPriConnect();
-
-                doGetPublicMsg();
-                doGetPrivateMsg();
+                mDataList.clear();
+                mMsgAdapter.notifyDataSetChanged();
+                break;
+            case R.id.bt_stop_long_cnt:
+                doStopPriConnect();
                 break;
         }
 
