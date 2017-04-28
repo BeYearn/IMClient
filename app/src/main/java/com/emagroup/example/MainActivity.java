@@ -178,16 +178,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void doGetSysExMsg(){
-        EmaImSdk.getInstance().getSysExMsg(new SysExMsgResponse(){
-
+        EmaImSdk.getInstance().getSysExMsg(new SysExMsgResponse() {
             @Override
-            public void onSysMsgGet(MsgBean unionMsgBean) {
+            public void onSysMsgGet(MsgBean sysMsgBean) {
+                mDataList.add("系统："+sysMsgBean.getMsg());
+                mMsgAdapter.notifyDataSetChanged();
 
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
             @Override
-            public void onExMsgGet(MsgBean worldMsgBean) {
+            public void onExMsgGet(MsgBean exMsgBean) {
+                mDataList.add("扩展 :"+ exMsgBean.getMsg());
+                mMsgAdapter.notifyDataSetChanged();
 
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
         });
     }

@@ -444,13 +444,13 @@ public class EmaImSdk {
         for (int i = 0; i < sysMsg.length(); i++) {
             JSONObject obj = sysMsg.getJSONObject(i);
             MsgBean sysMsgBean = getMsgBean(obj);
-            mWorldMsgQueue.enQueue(sysMsgBean);
+            mSysMsgQueue.enQueue(sysMsgBean);
         }
 
         for (int i = 0; i < exMsg.length(); i++) {
             JSONObject obj = exMsg.getJSONObject(i);
             MsgBean exMsgBean = getMsgBean(obj);
-            mWorldMsgQueue.enQueue(exMsgBean);
+            mExMsgQueue.enQueue(exMsgBean);
         }
 
         Message message = Message.obtain();
