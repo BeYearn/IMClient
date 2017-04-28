@@ -13,8 +13,12 @@ public class ImConstants {
     public static final String TEAM_ID = "teamId";
     public static final String UNION_ID = "unionId";
     public static final String WORLD_ID = "worldId";
+    public static final String SYS_ID = "sysId";
+    public static final String EX_ID = "exId";
     public static final String WORLD_LIMIT = "worldLimit";
     public static final String UNION_LIMIT = "unionLimit";
+    public static final String SYS_LIMIT = "sysLimit";
+    public static final String EX_LIMIT = "exLimit";
     public static final String TIME_STAMP = "ts";
     public static final String HANDLER = "handler";
     public static final String TID = "tId";
@@ -28,11 +32,14 @@ public class ImConstants {
 
     public static final int EMA_IM_UNION_MSG = 201;
     public static final int EMA_IM_WORLD_MSG = 202;
+    public static final int EMA_IM_SYS_MSG = 203;
+    public static final int EMA_IM_EX_MSG = 204;
 
 
     public static final String HANDLER_PRI_PERSONAL = "2";
     public static final String HANDLER_PRI_TEAM = "3";
     public static final String HANDLER_PUB_UNION = "4";
     public static final String HANDLER_PUB_WORLD = "5";
+    public static final String HANDLER_PUB_EX = "6";
 
 }

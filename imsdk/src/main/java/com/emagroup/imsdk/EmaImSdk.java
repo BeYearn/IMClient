@@ -10,6 +10,7 @@ import com.emagroup.imsdk.client.Packet;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.PrivateMsgResponse;
 import com.emagroup.imsdk.response.PublicMsgResponse;
+import com.emagroup.imsdk.response.SysExMsgResponse;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
 import com.emagroup.imsdk.util.MsgQueue;
@@ -23,8 +24,10 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.emagroup.imsdk.ImConstants.EMA_IM_EX_MSG;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_PUMP_MSG;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_PUT_MSG_OK;
+import static com.emagroup.imsdk.ImConstants.EMA_IM_SYS_MSG;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_UNION_MSG;
 import static com.emagroup.imsdk.ImConstants.EMA_IM_WORLD_MSG;
 
@@ -37,9 +40,14 @@ public class EmaImSdk {
     private static EmaImSdk instance;
     private String mServerHost;
     private Context mContext;
-    private PublicMsgResponse mHeartResponse;
+    private PublicMsgResponse mPublicMsgResponse;
+    private SysExMsgResponse mSysMsgResponse;
+
     private MsgQueue mUnionMsgQueue;
     private MsgQueue mWorldMsgQueue;
+    private MsgQueue mSysMsgQueue;
+    private MsgQueue mExMsgQueue;
+
     private int mHeartDelay;
 
     private String mUid;
@@ -54,17 +62,26 @@ public class EmaImSdk {
                 case EMA_IM_PUT_MSG_OK:
                     pumpMsg(EMA_IM_UNION_MSG, mUnionMsgQueue, mHeartDelay);
                     pumpMsg(EMA_IM_WORLD_MSG, mWorldMsgQueue, mHeartDelay);
+                    pumpMsg(EMA_IM_SYS_MSG, mSysMsgQueue, mHeartDelay);
+                    pumpMsg(EMA_IM_EX_MSG, mExMsgQueue, mHeartDelay);
                     break;
                 case EMA_IM_PUMP_MSG:
                     MsgBean msgBean = (MsgBean) msg.obj;
                     int type = msg.arg1;
                     if (null != msgBean) {
-                        if (mHeartResponse == null) {
+                        if (mPublicMsgResponse == null) {
                             return;
                         } else if (type == EMA_IM_UNION_MSG) {
-                            mHeartResponse.onUnionMsgGet(msgBean);
+                            mPublicMsgResponse.onUnionMsgGet(msgBean);
                         } else if (type == EMA_IM_WORLD_MSG) {
-                            mHeartResponse.onWorldMsgGet(msgBean);
+                            mPublicMsgResponse.onWorldMsgGet(msgBean);
+                        }
+                        if (mSysMsgResponse == null) {
+                            return;
+                        } else if (type == EMA_IM_SYS_MSG) {
+                            mSysMsgResponse.onSysMsgGet(msgBean);
+                        } else if (type == EMA_IM_EX_MSG) {
+                            mSysMsgResponse.onExMsgGet(msgBean);
                         }
                     }
 
@@ -189,7 +206,16 @@ public class EmaImSdk {
      * @param publicMsgResponse
      */
     public void getPubMsg(PublicMsgResponse publicMsgResponse) {
-        this.mHeartResponse = publicMsgResponse;
+        this.mPublicMsgResponse = publicMsgResponse;
+    }
+
+    /**
+     * 获取系统、扩展消息
+     *
+     * @param sysExMsgResponse
+     */
+    public void getSysExMsg(SysExMsgResponse sysExMsgResponse) {
+        this.mSysMsgResponse = sysExMsgResponse;
     }
 
     /**
@@ -329,6 +355,8 @@ public class EmaImSdk {
 
         mUnionMsgQueue = new MsgQueue();
         mWorldMsgQueue = new MsgQueue();
+        mSysMsgQueue = new MsgQueue();
+        mExMsgQueue = new MsgQueue();
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -397,6 +425,9 @@ public class EmaImSdk {
 
         JSONArray unionMsg = data.getJSONArray("unionMsg");
         JSONArray worldMsg = data.getJSONArray("worldMsg");
+        JSONArray sysMsg = data.getJSONArray("sysMsg");
+        JSONArray exMsg = data.getJSONArray("exMsg");
+
 
         for (int i = 0; i < unionMsg.length(); i++) {
             JSONObject obj = unionMsg.getJSONObject(i);
@@ -408,6 +439,18 @@ public class EmaImSdk {
             JSONObject obj = worldMsg.getJSONObject(i);
             MsgBean worldMsgBean = getMsgBean(obj);
             mWorldMsgQueue.enQueue(worldMsgBean);
+        }
+
+        for (int i = 0; i < sysMsg.length(); i++) {
+            JSONObject obj = sysMsg.getJSONObject(i);
+            MsgBean sysMsgBean = getMsgBean(obj);
+            mWorldMsgQueue.enQueue(sysMsgBean);
+        }
+
+        for (int i = 0; i < exMsg.length(); i++) {
+            JSONObject obj = exMsg.getJSONObject(i);
+            MsgBean exMsgBean = getMsgBean(obj);
+            mWorldMsgQueue.enQueue(exMsgBean);
         }
 
         Message message = Message.obtain();

@@ -15,6 +15,7 @@ import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.PrivateMsgResponse;
 import com.emagroup.imsdk.response.PublicMsgResponse;
+import com.emagroup.imsdk.response.SysExMsgResponse;
 import com.emagroup.imsdk.util.ToastHelper;
 
 import java.util.ArrayList;
@@ -60,9 +61,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
         btLongConnect = (Button) findViewById(R.id.bt_socket_build);
 
-        etSelfId= (EditText) findViewById(R.id.et_self_id);
-        etWorldId= (EditText) findViewById(R.id.et_world_id);
-        etUnionId= (EditText) findViewById(R.id.et_union_id);
+        etSelfId = (EditText) findViewById(R.id.et_self_id);
+        etWorldId = (EditText) findViewById(R.id.et_world_id);
+        etUnionId = (EditText) findViewById(R.id.et_union_id);
         etTeamId = (EditText) findViewById(R.id.et_team_id);
 
         etPubMsg = (EditText) findViewById(R.id.et_pub_msg);
@@ -70,10 +71,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etPubhanler = (EditText) findViewById(R.id.et_pub_handler);
 
         etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
-        etPriid= (EditText) findViewById(R.id.et_pri_id);
-        etPrihandler= (EditText) findViewById(R.id.et_pri_handler);
+        etPriid = (EditText) findViewById(R.id.et_pri_id);
+        etPrihandler = (EditText) findViewById(R.id.et_pri_handler);
 
-        btStopLongCnt= (Button) findViewById(R.id.bt_stop_long_cnt);
+        btStopLongCnt = (Button) findViewById(R.id.bt_stop_long_cnt);
 
         btLogin.setOnClickListener(this);
         btUpdateInfo.setOnClickListener(this);
@@ -93,18 +94,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         doGetPublicMsg();
+        doGetSysExMsg();
         doGetPrivateMsg();
     }
 
 
-
     private void doInitAndbuildPubConnect() {
 
-
-        mServerId= "01";
-        mUid=etSelfId.getText().toString();
-        mTeamId= etTeamId.getText().toString();
-        mUnionId=etUnionId.getText().toString();
+        mServerId = "01";
+        mUid = etSelfId.getText().toString();
+        mTeamId = etTeamId.getText().toString();
+        mUnionId = etUnionId.getText().toString();
         mWorldId = etWorldId.getText().toString();
 
 
@@ -112,31 +112,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, String> paramInit = new HashMap<>();
         paramInit.put(ImConstants.SERVER_ID, mServerId);
         paramInit.put(ImConstants.UID, mUid);
-        EmaImSdk.getInstance().init(this, paramInit,"a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
+        EmaImSdk.getInstance().init(this, paramInit, "a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
 
 
         //建立工会、世界的连接
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.UNION_ID, mUnionId);   // 没有就传 ""
         param.put(ImConstants.WORLD_ID, mWorldId);
+        param.put(ImConstants.SYS_ID, "01");
+        param.put(ImConstants.EX_ID, "c");       //扩展字段，如不需要扩展频道，则不用传该字段
         param.put(ImConstants.WORLD_LIMIT, "10");
         param.put(ImConstants.UNION_LIMIT, "10");
+        param.put(ImConstants.SYS_LIMIT, "10");
+        param.put(ImConstants.EX_LIMIT, "10");
         EmaImSdk.getInstance().buildPubConnect(param, 10);
     }
 
 
     private void doUpdate() {
 
-        mUid=etSelfId.getText().toString();
-        mTeamId= etTeamId.getText().toString();
-        mUnionId=etUnionId.getText().toString();
+        mUid = etSelfId.getText().toString();
+        mTeamId = etTeamId.getText().toString();
+        mUnionId = etUnionId.getText().toString();
         mWorldId = etWorldId.getText().toString();
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.UNION_ID, mUnionId);   // 改哪个传那个，短链改这两个
         param.put(ImConstants.WORLD_ID, mWorldId);
-        param.put(ImConstants.WORLD_LIMIT, "10");
-        param.put(ImConstants.UNION_LIMIT, "10");
+        param.put(ImConstants.SYS_ID, "02");
+        param.put(ImConstants.EX_ID, "d");
+        param.put(ImConstants.WORLD_LIMIT, "8");
+        param.put(ImConstants.UNION_LIMIT, "8");
+        param.put(ImConstants.SYS_LIMIT, "8");
+        param.put(ImConstants.EX_LIMIT, "8");
         EmaImSdk.getInstance().updatePubInfo(param, new ImResponse() {
             @Override
             public void onSuccessResponse() {
@@ -169,11 +177,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void doGetSysExMsg(){
+        EmaImSdk.getInstance().getSysExMsg(new SysExMsgResponse(){
+
+            @Override
+            public void onSysMsgGet(MsgBean unionMsgBean) {
+
+            }
+
+            @Override
+            public void onExMsgGet(MsgBean worldMsgBean) {
+
+            }
+        });
+    }
+
     private void doSendPublicMsg() {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.FNAME, mUid);
-        param.put(ImConstants.HANDLER,etPubhanler.getText().toString());    // 5世界 4工会
+        param.put(ImConstants.HANDLER, etPubhanler.getText().toString());    // 5世界 4工会
         param.put(ImConstants.TID, etPubid.getText().toString());
         param.put(ImConstants.MSG, etPubMsg.getText().toString());
         EmaImSdk.getInstance().sendPubMsg(param);
@@ -239,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void doupdateTeamInfo(){
+    private void doupdateTeamInfo() {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.MSG, "队伍id");
@@ -247,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EmaImSdk.getInstance().updateTeamInfo(param);
     }
 
-    private void doStopPriConnect(){
+    private void doStopPriConnect() {
         EmaImSdk.getInstance().stopPriConnect();
     }
 
