@@ -41,6 +41,7 @@ public class EmaImSdk {
     private String mServerHost;
     private Context mContext;
     private PublicMsgResponse mPublicMsgResponse;
+    private PrivateMsgResponse mPrivateMsgResponse;
     private SysExMsgResponse mSysMsgResponse;
 
     private MsgQueue mUnionMsgQueue;
@@ -285,6 +286,26 @@ public class EmaImSdk {
 
         //SocketRunable socketRunable = SocketRunable.getInstance();
         //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
+
+        //把自己发的消息也回调出来   世界工会信息服务器是返回的
+        String fName = param.get(ImConstants.FNAME);
+        String msg = param.get(ImConstants.MSG);
+        String handler = param.get(ImConstants.HANDLER);
+        String tId = param.get(ImConstants.TID);
+        MsgBean msgBean = new MsgBean();
+        msgBean.setAppId(mAppId);
+        msgBean.setfName(fName);
+        msgBean.setFuid(mUid);
+        msgBean.setHandler(handler);
+        msgBean.setMsg(msg);
+        msgBean.setMsgId(System.currentTimeMillis()+"");
+        msgBean.setServerId(mServerId);
+        msgBean.settID(tId);
+        if(handler.equals(ImConstants.HANDLER_PRI_PERSONAL)){
+            mPrivateMsgResponse.onPersonalMsgGet(msgBean);
+        }else if(handler.equals(ImConstants.HANDLER_PRI_TEAM)){
+            mPrivateMsgResponse.onTeamMsgGet(msgBean);
+        }
     }
 
     /**
@@ -294,6 +315,7 @@ public class EmaImSdk {
      */
     public void getPriMsg(PrivateMsgResponse privateMsgResponse) {
 
+        this.mPrivateMsgResponse = privateMsgResponse;
         Client client = Client.getInstance();
         client.setOnGetPriMsg(privateMsgResponse);
         //SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);

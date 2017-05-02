@@ -124,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.UNION_ID, metUnionId.getText().toString());   // 改哪个传那个，短链改这两个
         param.put(ImConstants.WORLD_ID, metWorldId.getText().toString());
-        param.put(ImConstants.SYS_ID, "02");
-        param.put(ImConstants.EX_ID, "d");
+        param.put(ImConstants.SYS_ID, "01");
+        param.put(ImConstants.EX_ID, "c");
         param.put(ImConstants.WORLD_LIMIT, "8");
         param.put(ImConstants.UNION_LIMIT, "8");
         param.put(ImConstants.SYS_LIMIT, "8");
