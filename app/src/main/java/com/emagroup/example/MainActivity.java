@@ -24,7 +24,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btLogin;
-    private Button btUpdateInfo;
+    private Button btUpdatePubInfo;
     private Button btSendPubMsg;
     private RecyclerView recylerMsg;
     private MsgAdapter mMsgAdapter;
@@ -34,20 +34,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText etPriMsg;
     private EditText etPubMsg;
     private Button btSenfPriMsg;
-    private String mServerId;
-    private String mUid;
-    private String mTeamId;
-    private String mUnionId;
-    private String mWorldId;
     private EditText etPubid;
     private EditText etPubhanler;
     private EditText etPriid;
     private EditText etPrihandler;
-    private EditText etSelfId;
-    private EditText etWorldId;
-    private EditText etUnionId;
-    private EditText etTeamId;
+    private EditText metSelfId;
+    private EditText metWorldId;
+    private EditText metUnionId;
+    private EditText metTeamId;
     private Button btStopLongCnt;
+    private Button btUpdatePriInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,21 +51,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         btLogin = (Button) findViewById(R.id.bt_init);
-        btUpdateInfo = (Button) findViewById(R.id.bt_update_info);
+        btUpdatePubInfo = (Button) findViewById(R.id.bt_update_pubinfo);
+        btUpdatePriInfo = (Button) findViewById(R.id.bt_update_priinfo);
         btSendPubMsg = (Button) findViewById(R.id.bt_send_pub_msg);
         btSenfPriMsg = (Button) findViewById(R.id.bt_send_pri_msg);
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
         btLongConnect = (Button) findViewById(R.id.bt_socket_build);
 
-        etSelfId = (EditText) findViewById(R.id.et_self_id);
-        etWorldId = (EditText) findViewById(R.id.et_world_id);
-        etUnionId = (EditText) findViewById(R.id.et_union_id);
-        etTeamId = (EditText) findViewById(R.id.et_team_id);
+        metSelfId = (EditText) findViewById(R.id.et_self_id);
+        metWorldId = (EditText) findViewById(R.id.et_world_id);
+        metUnionId = (EditText) findViewById(R.id.et_union_id);
+        metTeamId = (EditText) findViewById(R.id.et_team_id);
 
         etPubMsg = (EditText) findViewById(R.id.et_pub_msg);
         etPubid = (EditText) findViewById(R.id.et_pub_id);
         etPubhanler = (EditText) findViewById(R.id.et_pub_handler);
-
         etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
         etPriid = (EditText) findViewById(R.id.et_pri_id);
         etPrihandler = (EditText) findViewById(R.id.et_pri_handler);
@@ -77,7 +73,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btStopLongCnt = (Button) findViewById(R.id.bt_stop_long_cnt);
 
         btLogin.setOnClickListener(this);
-        btUpdateInfo.setOnClickListener(this);
+        btUpdatePubInfo.setOnClickListener(this);
+        btUpdatePriInfo.setOnClickListener(this);
         btSendPubMsg.setOnClickListener(this);
         btSenfPriMsg.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
@@ -101,24 +98,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void doInitAndbuildPubConnect() {
 
-        mServerId = "01";
-        mUid = etSelfId.getText().toString();
-        mTeamId = etTeamId.getText().toString();
-        mUnionId = etUnionId.getText().toString();
-        mWorldId = etWorldId.getText().toString();
-
-
         //初始化
         HashMap<String, String> paramInit = new HashMap<>();
-        paramInit.put(ImConstants.SERVER_ID, mServerId);
-        paramInit.put(ImConstants.UID, mUid);
+        paramInit.put(ImConstants.SERVER_ID, "01");
+        paramInit.put(ImConstants.UID, metSelfId.getText().toString());
         EmaImSdk.getInstance().init(this, paramInit, "a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
 
 
         //建立工会、世界的连接
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.UNION_ID, mUnionId);   // 没有就传 ""
-        param.put(ImConstants.WORLD_ID, mWorldId);
+        param.put(ImConstants.UNION_ID, metUnionId.getText().toString());   // 没有就传 ""
+        param.put(ImConstants.WORLD_ID, metWorldId.getText().toString());
         param.put(ImConstants.SYS_ID, "01");
         param.put(ImConstants.EX_ID, "c");       //扩展字段，如不需要扩展频道，则不用传该字段
         param.put(ImConstants.WORLD_LIMIT, "10");
@@ -131,14 +121,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void doUpdate() {
 
-        mUid = etSelfId.getText().toString();
-        mTeamId = etTeamId.getText().toString();
-        mUnionId = etUnionId.getText().toString();
-        mWorldId = etWorldId.getText().toString();
-
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.UNION_ID, mUnionId);   // 改哪个传那个，短链改这两个
-        param.put(ImConstants.WORLD_ID, mWorldId);
+        param.put(ImConstants.UNION_ID, metUnionId.getText().toString());   // 改哪个传那个，短链改这两个
+        param.put(ImConstants.WORLD_ID, metWorldId.getText().toString());
         param.put(ImConstants.SYS_ID, "02");
         param.put(ImConstants.EX_ID, "d");
         param.put(ImConstants.WORLD_LIMIT, "8");
@@ -200,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doSendPublicMsg() {
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.FNAME, mUid);
+        param.put(ImConstants.FNAME, "user"+metSelfId.getText().toString());
         param.put(ImConstants.HANDLER, etPubhanler.getText().toString());    // 5世界 4工会
         param.put(ImConstants.TID, etPubid.getText().toString());
         param.put(ImConstants.MSG, etPubMsg.getText().toString());
@@ -229,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String[] split = s.split(",");
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.FNAME, mUid);
+        param.put(ImConstants.FNAME, "user"+metSelfId.getText().toString());
         param.put(ImConstants.HANDLER, etPrihandler.getText().toString());    // 2私聊 3队伍
         param.put(ImConstants.TID, etPriid.getText().toString());
         param.put(ImConstants.MSG, etPriMsg.getText().toString());
@@ -257,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mDataList.add("世界：" + MsgBean.getMsg());
+                        mDataList.add("队伍：" + MsgBean.getMsg());
                         mMsgAdapter.notifyDataSetChanged();
                         recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
                     }
@@ -270,7 +255,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doupdateTeamInfo() {
 
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.MSG, "队伍id");
+
+        param.put(ImConstants.MSG, metTeamId.getText().toString());
 
         EmaImSdk.getInstance().updateTeamInfo(param);
     }
@@ -286,8 +272,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_init:
                 doInitAndbuildPubConnect();
                 break;
-            case R.id.bt_update_info:
+            case R.id.bt_update_pubinfo:
                 doUpdate();
+                break;
+            case R.id.bt_update_priinfo:
+                doupdateTeamInfo();
                 break;
             case R.id.bt_send_pub_msg:
                 doSendPublicMsg();
