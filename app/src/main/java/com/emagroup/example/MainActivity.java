@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onUnionMsgGet(MsgBean UnionMsgBean) {
 
-                mDataList.add("公会：" + UnionMsgBean.getMsg());
+                mDataList.add("公会：" + UnionMsgBean.getMsg()+" from id "+UnionMsgBean.getFuid());
                 mMsgAdapter.notifyDataSetChanged();
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onWorldMsgGet(MsgBean worldMsgBean) {
 
-                mDataList.add("世界：" + worldMsgBean.getMsg());
+                mDataList.add("世界：" + worldMsgBean.getMsg()+" from id "+worldMsgBean.getFuid());
                 mMsgAdapter.notifyDataSetChanged();
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EmaImSdk.getInstance().getSysExMsg(new SysExMsgResponse() {
             @Override
             public void onSysMsgGet(MsgBean sysMsgBean) {
-                mDataList.add("系统："+sysMsgBean.getMsg());
+                mDataList.add("系统："+sysMsgBean.getMsg()+" from id "+sysMsgBean.getFuid());
                 mMsgAdapter.notifyDataSetChanged();
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onExMsgGet(MsgBean exMsgBean) {
-                mDataList.add("扩展 :"+ exMsgBean.getMsg());
+                mDataList.add("扩展 :"+ exMsgBean.getMsg()+" from id "+exMsgBean.getFuid());
                 mMsgAdapter.notifyDataSetChanged();
 
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
