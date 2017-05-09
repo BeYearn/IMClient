@@ -47,7 +47,6 @@ public class RunableRead implements Runnable {
                 msgBean.setHandler(strFromSocket.getString("handler"));
                 msgBean.setMsg(strFromSocket.getString("msg"));
                 msgBean.setMsgId(strFromSocket.getString("msgId"));
-                msgBean.setServerId(strFromSocket.getString("serverId"));
                 msgBean.settID(strFromSocket.getString("tId"));
 
                 switch (Integer.parseInt(msgBean.getHandler())) {

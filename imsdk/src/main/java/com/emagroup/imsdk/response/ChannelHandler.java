@@ -12,5 +12,5 @@ public interface ChannelHandler {
 
     void onGetMsg(MsgBean msgBean);
 
-    void onStop(String channelId);
+    void onLeave(String channelId);
 }

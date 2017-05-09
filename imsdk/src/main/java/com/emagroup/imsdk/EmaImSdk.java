@@ -1,6 +1,6 @@
 package com.emagroup.imsdk;
 
-import android.content.Context;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -38,8 +38,6 @@ public class EmaImSdk {
 
     private static EmaImSdk instance;
     private String mServerHost;
-    private Context mContext;
-
     private ImResponse registResponse;
 
     private PublicMsgResponse mPublicMsgResponse;
@@ -47,11 +45,14 @@ public class EmaImSdk {
     private SysExMsgResponse mSysMsgResponse;
 
     private int mShortHeartDelay;
+    private int mLongHeartDelay;
+
     private String mMsgLimit;
     private String mUid;
     private String mServerId;
     private static String mAppKey;
     private static String mAppId;
+
     private String mInitChannelID;
 
     private boolean mFirstJoin = true; //第一加入频道才心跳
@@ -85,7 +86,8 @@ public class EmaImSdk {
             }
         }
     };
-
+    private Timer mHeartTimer;
+    private Activity mActivity;
 
     private EmaImSdk() {
     }
@@ -109,7 +111,9 @@ public class EmaImSdk {
      * @param params
      * @param response
      */
-    public void regist(Map<String, String> params, ImResponse response) {
+    public void regist(Activity activity, Map<String, String> params, ImResponse response) {
+
+        this.mActivity= activity;
 
         mHandlerMap = new HashMap<>();
         mMsgQueueMap = new HashMap<>();
@@ -135,17 +139,16 @@ public class EmaImSdk {
             String shortDelay = params.get(ImConstants.SHORT_HEARTBEAT_DELAY);
             String longDelay = params.get(ImConstants.LONG_HEARTBEAT_DELAY);
             mShortHeartDelay = Integer.parseInt(shortDelay == null ? "10" : shortDelay);
-            mShortHeartDelay = Integer.parseInt(longDelay == null ? "10" : longDelay);
+            mLongHeartDelay = Integer.parseInt(longDelay == null ? "20" : longDelay);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("imregist", "heartbeat delay time error");
             response.onFailed();
             return;
         }
-        //短链接（短链心跳也开始 不行，因为这时候还没消息回调handler）
+        //短链接（短链心跳也开始 不行，因为这时候还没消息回调handler） 里面进一步长连接
         shortLinkConnect();
-        //长连接
-        //longLinkConnect(response);    //在这里面某个时机 onsuccess
+
 
     }
 
@@ -237,7 +240,7 @@ public class EmaImSdk {
     }
 
     /**
-     * 离开某频道
+     * 离开某短频道
      *
      * @param channelId
      */
@@ -267,7 +270,7 @@ public class EmaImSdk {
 
                     if (0 == status) {
                         ChannelHandler channelHandler = mHandlerMap.get(strid);
-                        channelHandler.onStop(strid);
+                        channelHandler.onLeave(strid);
                     }
 
                 } catch (Exception e) {
@@ -285,8 +288,9 @@ public class EmaImSdk {
      * @param handler
      */
     public void joinLongLinkChannel(String channelId, ChannelHandler handler) {
+
         Client client = Client.getInstance();
-        client.setChannelHandler(channelId, handler);
+        client.joinChannel(channelId, handler);
     }
 
     /**
@@ -295,15 +299,72 @@ public class EmaImSdk {
      * @param channelId
      * @param msg
      */
-    public void sendLongLinkMsg(String channelId, String msg) {
+    public void sendLongLinkMsg(String channelId, String fName, String msg) {
 
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.APP_ID, mAppId);
+        param.put(ImConstants.FNAME, fName);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.HANDLER, "3");
+        param.put(ImConstants.TID, channelId);
+        param.put(ImConstants.MSG, msg);
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+
+        //把自己发的消息也回调出来   世界工会信息服务器是返回的
+        String nName = param.get(ImConstants.FNAME);
+        String nMsg = param.get(ImConstants.MSG);
+        String nHandler = param.get(ImConstants.HANDLER);
+        String nTId = param.get(ImConstants.TID);
+        MsgBean msgBean = new MsgBean();
+        msgBean.setAppId(mAppId);
+        msgBean.setfName(nName);
+        msgBean.setFuid(mUid);
+        msgBean.setHandler(nHandler);
+        msgBean.setMsg(nMsg);
+        msgBean.setMsgId(System.currentTimeMillis() + "");
+        msgBean.settID(nTId);
+
+
+        Client client = Client.getInstance();
+        Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet,msgBean);
     }
 
     /**
      * 发送私人消息
      */
-    public void sendPriMsg(String uid, String msg) {
+    public void sendPriMsg(String uid, String fName, String msg) {
 
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.APP_ID, mAppId);
+        param.put(ImConstants.FNAME, fName);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.HANDLER, "2");
+        param.put(ImConstants.TID, uid);
+        param.put(ImConstants.MSG, msg);
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+
+        //把自己发的消息也回调出来   世界工会信息服务器是返回的
+        String nName = param.get(ImConstants.FNAME);
+        String nMsg = param.get(ImConstants.MSG);
+        String nHandler = param.get(ImConstants.HANDLER);
+        String nTId = param.get(ImConstants.TID);
+        MsgBean msgBean = new MsgBean();
+        msgBean.setAppId(mAppId);
+        msgBean.setfName(nName);
+        msgBean.setFuid(mUid);
+        msgBean.setHandler(nHandler);
+        msgBean.setMsg(nMsg);
+        msgBean.setMsgId(System.currentTimeMillis() + "");
+        msgBean.settID(nTId);
+
+        Client client = Client.getInstance();
+        Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet,msgBean);
     }
 
 
@@ -314,20 +375,32 @@ public class EmaImSdk {
      */
     public void leaveLongLinkChannel(String channelId) {
 
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.APP_ID, mAppId);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.HANDLER, "97");
+        param.put(ImConstants.TID, "0");
+        param.put(ImConstants.MSG, channelId);
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+        Client client = Client.getInstance();
+        Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet);
     }
 
     /**
      * 停止im
      */
     public void stop() {
+        //长连接的停止
         HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.APP_ID, mAppId);
+        param.put(ImConstants.FUID, mUid);
+        param.put(ImConstants.HANDLER, "99"); //退出服务器
         param.put(ImConstants.TID, "0");  //固定 告诉服务器
         param.put(ImConstants.MSG, "");
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-        param.put(ImConstants.HANDLER, "99"); //退出服务器
 
         Client client = Client.getInstance();
         Packet packet = new Packet();
@@ -335,10 +408,11 @@ public class EmaImSdk {
         client.send(packet);
 
         client.close();
+
+        //短链心跳的停止
+        mHeartTimer.cancel();
+        registResponse.onStoped();
     }
-
-
-    //---------------------------改版分割线---------------------------
 
 
     /**
@@ -374,7 +448,7 @@ public class EmaImSdk {
 
                     if (0 == status) {
 
-
+                        longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
                     }
 
                 } catch (Exception e) {
@@ -382,56 +456,6 @@ public class EmaImSdk {
                 }
             }
         });
-    }
-
-    /**
-     * 更新服务器信息
-     *
-     * @param param
-     */
-    public void updatePubInfo(HashMap<String, String> param, final ImResponse response) {
-
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.UID, mUid);
-        param.put(ImConstants.APP_ID, mAppId);
-        param.put(ImConstants.TIME_STAMP, System.currentTimeMillis() + "");
-
-        String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.SERVER_ID) + param.get(ImConstants.TIME_STAMP) + param.get(ImConstants.UID) + mAppKey;
-        sign = ConfigUtils.MD5(sign);
-        param.put(ImConstants.SIGN, sign);
-        new HttpRequestor().doPostAsync(ImUrl.getUpdateInfoUrl(), param, new HttpRequestor.OnResponsetListener() {
-            @Override
-            public void OnResponse(String result) {
-                try {
-
-                    JSONObject jsonObject = new JSONObject(result);
-                    int status = jsonObject.getInt("status");
-                    if (0 == status) {
-                        response.onSuccessed();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    /**
-     * 获取世界、工会消息
-     *
-     * @param publicMsgResponse
-     */
-    public void getPubMsg(PublicMsgResponse publicMsgResponse) {
-        this.mPublicMsgResponse = publicMsgResponse;
-    }
-
-    /**
-     * 获取系统、扩展消息
-     *
-     * @param sysExMsgResponse
-     */
-    public void getSysExMsg(SysExMsgResponse sysExMsgResponse) {
-        this.mSysMsgResponse = sysExMsgResponse;
     }
 
 
@@ -439,117 +463,18 @@ public class EmaImSdk {
      * 建立长连接
      */
     public void longLinkConnect(ImResponse response) {
+
         HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.APP_ID, mAppId);
+        param.put(ImConstants.FUID, mUid);
         param.put(ImConstants.MSG, "i am long connect info");
         param.put(ImConstants.HANDLER, "0");    // 0服务器  1心跳  2私聊 3队伍
         param.put(ImConstants.TID, "0");
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         Client client = Client.getInstance();
-        client.setInitRe(mContext, response, param);
-        client.open(mServerHost, 9999);
-    }
-
-    /**
-     * 发送私人或组队聊天（同时获取聊天信息）
-     *
-     * @param param
-     */
-    public void sendPriMsg(HashMap<String, String> param) {
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, mAppId);
-        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-
-        Client client = Client.getInstance();
-        Packet packet = new Packet();
-        packet.setData(new JSONObject(param).toString());
-        client.send(packet);
-
-        //SocketRunable socketRunable = SocketRunable.getInstance();
-        //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
-
-        //把自己发的消息也回调出来   世界工会信息服务器是返回的
-        String fName = param.get(ImConstants.FNAME);
-        String msg = param.get(ImConstants.MSG);
-        String handler = param.get(ImConstants.HANDLER);
-        String tId = param.get(ImConstants.TID);
-        MsgBean msgBean = new MsgBean();
-        msgBean.setAppId(mAppId);
-        msgBean.setfName(fName);
-        msgBean.setFuid(mUid);
-        msgBean.setHandler(handler);
-        msgBean.setMsg(msg);
-        msgBean.setMsgId(System.currentTimeMillis() + "");
-        msgBean.setServerId(mServerId);
-        msgBean.settID(tId);
-        /*if (handler.equals(ImConstants.HANDLER_PRI_PERSONAL)) {
-            mPrivateMsgResponse.onPersonalMsgGet(msgBean);
-        } else if (handler.equals(ImConstants.HANDLER_PRI_TEAM)) {
-            mPrivateMsgResponse.onTeamMsgGet(msgBean);
-        }*/
-    }
-
-    /**
-     * 接收private信息
-     *
-     * @param privateMsgResponse
-     */
-    public void getPriMsg(PrivateMsgResponse privateMsgResponse) {
-
-        this.mPrivateMsgResponse = privateMsgResponse;
-        Client client = Client.getInstance();
-        //client.setOnGetPriMsg(privateMsgResponse);
-
-        //SocketRunable.getInstance().setOnMsgResponce(privateMsgResponse);
-    }
-
-    /**
-     * 更新队伍信息 改变队伍id 或者退出队伍
-     *
-     * @param param
-     */
-    public void updateTeamInfo(HashMap<String, String> param) {
-
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        //param.put(ImConstants.APP_ID, ConfigUtils.getAppId(mContext));
-        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-        param.put(ImConstants.HANDLER, "98"); //退出或加入teamid
-        param.put(ImConstants.TID, "0");  //固定 告诉服务器
-
-        Client client = Client.getInstance();
-        Packet packet = new Packet();
-        packet.setData(new JSONObject(param).toString());
-        client.send(packet);
-        //SocketRunable socketRunable = SocketRunable.getInstance();
-        //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
-    }
-
-    /**
-     * 停止长连接，退出服务器
-     */
-    public void stopPriConnect() {
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.TID, "0");  //固定 告诉服务器
-        param.put(ImConstants.MSG, "");
-        param.put(ImConstants.SERVER_ID, mServerId);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.APP_ID, mAppId);
-        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-        param.put(ImConstants.HANDLER, "99"); //退出服务器
-
-        Client client = Client.getInstance();
-        Packet packet = new Packet();
-        packet.setData(new JSONObject(param).toString());
-        client.send(packet);
-
-        client.close();
-        //SocketRunable socketRunable = SocketRunable.getInstance();
-        //socketRunable.putStrIntoSocket(new JSONObject(param).toString());
+        client.setInitRe(mActivity, response, param);
+        client.open(mServerHost, 9999, mLongHeartDelay);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -567,8 +492,8 @@ public class EmaImSdk {
         sign = ConfigUtils.MD5(sign);
         heartParam.put(ImConstants.SIGN, sign);
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        mHeartTimer = new Timer();
+        mHeartTimer.schedule(new TimerTask() {
             @Override
             public void run() {
 
@@ -641,7 +566,7 @@ public class EmaImSdk {
                     entry.getValue().enQueue(msgBean);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
 

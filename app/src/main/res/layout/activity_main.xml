@@ -36,28 +36,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="appid"
-                android:text="a" />
+                android:text="20007" />
 
             <EditText
                 android:id="@+id/et_self_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="selfuid"
-                android:text="8" />
+                android:text="88" />
 
             <EditText
                 android:id="@+id/et_msg_limit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="msg_limit"
-                android:text="10" />
+                android:text="8" />
 
             <EditText
+                android:visibility="gone"
                 android:id="@+id/et_channel_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="channelId"
-                android:text="channel01"/>
+                android:text="room01"/>
 
             <Button
                 android:id="@+id/bt_regist"
@@ -90,7 +91,7 @@
                 android:background="@color/colorPrimary"
                 android:gravity="center"
                 android:hint="channelId"
-                android:text="4" />
+                android:text="room01" />
 
             <Button
                 android:id="@+id/bt_clear_all"
@@ -146,7 +147,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:hint="to id"
-                android:text="4" />
+                android:text="room01" />
 
             <EditText
                 android:id="@+id/et_short_msg"
@@ -177,7 +178,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:hint="to id"
-                android:text="4" />
+                android:text="room01" />
 
             <EditText
                 android:id="@+id/et_long_msg"
@@ -202,7 +203,7 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/et_uid"
+                android:id="@+id/et_pri_uid"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

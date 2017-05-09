@@ -11,7 +11,6 @@ public class MsgBean {
     private String handler;
     private String msg;
     private String msgId;
-    private String serverId;
     private String tID;
 
     public String getAppId() {
@@ -60,14 +59,6 @@ public class MsgBean {
 
     public void setMsgId(String msgId) {
         this.msgId = msgId;
-    }
-
-    public String getServerId() {
-        return serverId;
-    }
-
-    public void setServerId(String serverId) {
-        this.serverId = serverId;
     }
 
     public String gettID() {

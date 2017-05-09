@@ -7,7 +7,6 @@ package com.emagroup.imsdk;
 public class ImConstants {
     public static final String APP_ID = "appId";
     public static final String APP_KEY = "appKey";
-    public static final String SERVER_ID = "serverId";
     public static final String SERVER_URL = "serverUrl";
 
     public static final String UID = "uid";

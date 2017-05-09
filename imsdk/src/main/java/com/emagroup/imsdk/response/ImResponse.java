@@ -1,5 +1,7 @@
 package com.emagroup.imsdk.response;
 
+import com.emagroup.imsdk.MsgBean;
+
 /**
  * Created by Administrator on 2017/4/18.
  */
@@ -11,5 +13,5 @@ public interface ImResponse {
 
     void onStoped();
 
-    void onGetPriMsg();  // 收私人消息
+    void onGetPriMsg(MsgBean msgBean);  // 收私人消息
 }

@@ -38,14 +38,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<String> mDataList;
     private MsgAdapter mMsgAdapter;
     private EditText etAppId;
-    private EditText etUid;
+    private EditText etSelfUid;
     private EditText etMsgLimit;
-    private EditText etChannelId;
+    //private EditText etChannelId;
     private EditText etChangeChannelId;
     private EditText etShortChannelId;
     private EditText etShortMsg;
     private EditText etLongChannelId;
     private EditText etLongMsg;
+    private EditText etPriUid;
+    private EditText etPriMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +69,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btLeaveLChannel = (Button) findViewById(R.id.bt_leave_longid);
 
         etAppId = (EditText) findViewById(R.id.et_app_id);
-        etUid = (EditText) findViewById(R.id.et_self_id);
+        etSelfUid = (EditText) findViewById(R.id.et_self_id);
         etMsgLimit = (EditText) findViewById(R.id.et_msg_limit);
-        etChannelId = (EditText) findViewById(R.id.et_channel_id);
+        //etChannelId = (EditText) findViewById(R.id.et_channel_id);
 
         etChangeChannelId = (EditText) findViewById(R.id.et_change_channel_id);
 
@@ -77,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etShortMsg = (EditText) findViewById(R.id.et_short_msg);
         etLongChannelId = (EditText) findViewById(R.id.et_long_channelid);
         etLongMsg = (EditText) findViewById(R.id.et_long_msg);
+        etPriUid = (EditText)findViewById(R.id.et_pri_uid);
+        etPriMsg =(EditText)findViewById(R.id.et_pri_msg);
+
 
         btRegist.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
@@ -104,35 +109,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, String> registParams = new HashMap<>();
         registParams.put(ImConstants.APP_ID, "20007");
         registParams.put(ImConstants.APP_KEY, "a5fdfc18c72f4fc9602746ddec9f3b21");
-        registParams.put(ImConstants.UID, "88");
-        registParams.put(ImConstants.MSG_NUM_LIMIT, "8"); // 该字段不传默认为10
+        registParams.put(ImConstants.UID, etSelfUid.getText().toString());
+        registParams.put(ImConstants.MSG_NUM_LIMIT, etMsgLimit.getText().toString()); // 该字段不传默认为10
         registParams.put(ImConstants.SERVER_URL, "http://118.178.230.138:8080/");  //注意格式
-        EmaImSdk.getInstance().regist(registParams, new ImResponse() {
+
+        registParams.put(ImConstants.SHORT_HEARTBEAT_DELAY, "10");
+        registParams.put(ImConstants.LONG_HEARTBEAT_DELAY, "20");
+        EmaImSdk.getInstance().regist(this,registParams, new ImResponse() {
+
             @Override
             public void onSuccessed() {
-
+                ToastHelper.toast(MainActivity.this, "regist succ");
             }
 
             @Override
             public void onFailed() {
-
+                ToastHelper.toast(MainActivity.this, "regist onFailed");
             }
 
             @Override
             public void onStoped() {
-
+                ToastHelper.toast(MainActivity.this, "regist onStoped");
             }
 
             @Override
-            public void onGetPriMsg() {
-
+            public void onGetPriMsg(MsgBean msgBean) {
+                mDataList.add(msgBean.getFuid()+" : "+msgBean.getMsg());
+                mMsgAdapter.notifyDataSetChanged();
+                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
             }
         });
     }
 
     public void joinShortChannel() {
 
-        EmaImSdk.getInstance().joinShortLinkChannel("room01", new ChannelHandler() {
+        EmaImSdk.getInstance().joinShortLinkChannel(etChangeChannelId.getText().toString(), new ChannelHandler() {
             @Override
             public void onJoined(String channelId) {
                 ToastHelper.toast(MainActivity.this, "onJoined succ");
@@ -140,28 +151,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getMsg());
+                mDataList.add(msgBean.getFuid()+" : "+msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
+                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
             }
 
             @Override
-            public void onStop(String channelId) {
-                ToastHelper.toast(MainActivity.this, "onStop succ");
+            public void onLeave(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onLeave succ");
             }
         });
     }
 
     public void sendShortMsg() {
-        EmaImSdk.getInstance().sendShortLinkMsg("room01", "大哥大", "woshidageda");
+        EmaImSdk.getInstance().sendShortLinkMsg(etShortChannelId.getText().toString(), etSelfUid.getText().toString(), etShortMsg.getText().toString());
     }
 
     public void leaveShortChannel() {
-        EmaImSdk.getInstance().leaveShortLinkChannel("room01");
+        EmaImSdk.getInstance().leaveShortLinkChannel(etShortChannelId.getText().toString());
     }
 
 
+    public void joinLongChannel() {
+        EmaImSdk.getInstance().joinLongLinkChannel(etChangeChannelId.getText().toString(), new ChannelHandler() {
+            @Override
+            public void onJoined(String channelId) {
+                ToastHelper.toast(MainActivity.this, "joinLongChannel succ");
+            }
+
+            @Override
+            public void onGetMsg(MsgBean msgBean) {
+                mDataList.add(msgBean.getFuid()+" : "+msgBean.getMsg());
+                mMsgAdapter.notifyDataSetChanged();
+                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
+            }
+
+            @Override
+            public void onLeave(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onJoined succ");
+            }
+        });
+    }
+
+    public void sendLongMsg() {
+        EmaImSdk.getInstance().sendLongLinkMsg(etLongChannelId.getText().toString(), etSelfUid.getText().toString(), etLongMsg.getText().toString());
+    }
+
+    public void sendPriMsg(){
+        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(),etSelfUid.getText().toString(),etPriMsg.getText().toString());
+    }
+
+    public void leaveLongChannel() {
+        EmaImSdk.getInstance().leaveLongLinkChannel(etLongChannelId.getText().toString());
+    }
+
     private void doStopPriConnect() {
-        EmaImSdk.getInstance().stopPriConnect();
+        EmaImSdk.getInstance().stop();
     }
 
 
@@ -176,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mMsgAdapter.notifyDataSetChanged();
                 break;
             case R.id.bt_stop_im:
-
+                doStopPriConnect();
                 break;
 
             case R.id.bt_join_shortlink_channel:
@@ -187,6 +232,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.bt_leave_shortid:
                 leaveShortChannel();
+                break;
+
+            case R.id.bt_join_longlink_channel:
+                joinLongChannel();
+                break;
+            case R.id.bt_send_longmsg:
+                sendLongMsg();
+                break;
+            case R.id.bt_leave_longid:
+                leaveLongChannel();
+                break;
+            case R.id.bt_send_primsg:
+                sendPriMsg();
                 break;
         }
 

@@ -96,7 +96,6 @@ public class SocketRunable implements Runnable {
             public void run() {
                 HashMap<String, String> heartParam = new HashMap<>();
                 heartParam.put(ImConstants.APP_ID, mInfoParam.get(ImConstants.APP_ID));
-                heartParam.put(ImConstants.SERVER_ID, mInfoParam.get(ImConstants.SERVER_ID));
                 heartParam.put(ImConstants.FUID, mInfoParam.get(ImConstants.FUID));
                 heartParam.put(ImConstants.HANDLER, "1");
                 heartParam.put(ImConstants.TID, "0"); // 固定

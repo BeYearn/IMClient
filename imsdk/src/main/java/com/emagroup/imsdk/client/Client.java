@@ -1,6 +1,7 @@
 package com.emagroup.imsdk.client;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -8,8 +9,6 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
-import com.emagroup.imsdk.response.PrivateMsgResponse;
-import com.emagroup.imsdk.util.MsgQueue;
 
 import org.json.JSONObject;
 
@@ -61,12 +60,13 @@ public class Client {
     private LinkedBlockingQueue<Packet> requestQueen = new LinkedBlockingQueue<>();
     private final Object lock = new Object();
     private final String TAG = "Client";
-    private PrivateMsgResponse onGetPriMsg;
-    private HashMap<String, String> mInfoParam;
+
+    private HashMap<String, String> mInitInfo;
     private Timer mHeartTimer;
 
     private HashMap<String, ChannelHandler> mHandlerMap;
-    private HashMap<String, MsgQueue> mMsgQueueMap;
+    //private HashMap<String, MsgQueue> mMsgQueueMap;
+    private int HbDelay;
 
 
     public static Client getInstance() {
@@ -80,23 +80,52 @@ public class Client {
     private Client() {
 
         mHandlerMap = new HashMap<>();
-        mMsgQueueMap =new HashMap<>();
+        //mMsgQueueMap = new HashMap<>();
     }
 
 
     public void setInitRe(Context mContext, ImResponse response, HashMap<String, String> param) {
         this.context = mContext;
         this.respListener = response;
-        this.mInfoParam = param;
+        this.mInitInfo = param;
     }
 
-    public void setChannelHandler(String channelId, ChannelHandler handler) {
-        mHandlerMap.put(channelId,handler);
-        mMsgQueueMap.put(channelId,new MsgQueue());
+    public void joinChannel(String channelId, ChannelHandler handler) {
+        mHandlerMap.put(channelId, handler);
+        //mMsgQueueMap.put(channelId, new MsgQueue());
+
+        HashMap<String, String> joinParam = new HashMap<>();
+        joinParam.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
+        joinParam.put(ImConstants.FUID, mInitInfo.get(ImConstants.FUID));
+        joinParam.put(ImConstants.HANDLER, "98");
+        joinParam.put(ImConstants.TID, "0");
+        joinParam.put(ImConstants.MSG, channelId);
+        joinParam.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+        String joinMsg = new JSONObject(joinParam).toString();
+        send(new Packet(joinMsg));
     }
 
 
     public int send(Packet in) {
+        requestQueen.add(in);
+        synchronized (lock) {
+            lock.notifyAll();
+        }
+        return in.getId();
+    }
+
+    public int send(Packet in, MsgBean selfMsgBean) {
+
+        if (selfMsgBean.getHandler().equals("3")) {   //长连接频道
+            ChannelHandler channelHandler = mHandlerMap.get(selfMsgBean.gettID());
+            if(channelHandler!=null){
+                channelHandler.onGetMsg(selfMsgBean);
+            }
+        } else if (selfMsgBean.getHandler().equals("2")) {   //长连接私人
+            respListener.onGetPriMsg(selfMsgBean);
+        }
+
         requestQueen.add(in);
         synchronized (lock) {
             lock.notifyAll();
@@ -122,9 +151,10 @@ public class Client {
         reconn();
     }
 
-    public void open(String host, int port) {
+    public void open(String host, int port, int heartBeatDelay) {
         this.IP = host;
         this.PORT = port;
+        this.HbDelay = heartBeatDelay;
         reconn();
     }
 
@@ -156,10 +186,10 @@ public class Client {
                 }
 
                 try {
-                    if(null!=mHeartTimer){     //心跳的停止
+                    if (null != mHeartTimer) {     //心跳的停止
                         mHeartTimer.cancel();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -248,7 +278,7 @@ public class Client {
                         }
 
                         send = new Thread(new Send());
-                        rec = new Thread(new Rec());
+                        rec = new Thread(new Receive());
 
                         send.start();
                         rec.start();
@@ -306,35 +336,35 @@ public class Client {
         }
     }
 
-    private class Rec implements Runnable {
+    private class Receive implements Runnable {
         public void run() {
-            Log.v(TAG, "Rec :Start");
+            Log.v(TAG, "Receive :Start");
 
             try {
                 while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != reader) {
-                    Log.v(TAG, "Rec :---------");
+                    Log.v(TAG, "Receive :---------");
                     String str = null;
                     while ((str = reader.readLine()) != null) {    //误以为readLine()是读取到没有数据时就返回null(因为其它read方法当读到没有数据时返回-1)，而实际上readLine()是一个阻塞函数，当没有数据读取时，就一直会阻塞在那，而不是返回null；readLine()只有在数据流发生异常或者另一端被close()掉时，才会返回null值。
                         if (null != respListener) {
 
                             JSONObject strFromSocket = new JSONObject(str);
 
-                            MsgBean msgBean = new MsgBean();
+                            final MsgBean msgBean = new MsgBean();
                             msgBean.setAppId(strFromSocket.getString("appId"));
                             msgBean.setfName(strFromSocket.getString("fName"));
                             msgBean.setFuid(strFromSocket.getString("fUid"));
                             msgBean.setHandler(strFromSocket.getString("handler"));
                             msgBean.setMsg(strFromSocket.getString("msg"));
                             msgBean.setMsgId(strFromSocket.getString("msgId"));
-                            msgBean.setServerId(strFromSocket.getString("serverId"));
                             msgBean.settID(strFromSocket.getString("tId"));
+
 
                             switch (Integer.parseInt(msgBean.getHandler())) {
 
                                 case 0: //socket建立成功后受到服务器信息
 
                                     //向服务器提交初始信息
-                                    send(new Packet(new JSONObject(mInfoParam).toString()));
+                                    send(new Packet(new JSONObject(mInitInfo).toString()));
 
                                     break;
                                 case 96: //提交初始信息后服务器返会
@@ -345,18 +375,45 @@ public class Client {
                                     connectHeart();
 
                                     break;
+                                case 97:   //退出频道后会原样反回
+
+                                    ChannelHandler channelHandlerL = mHandlerMap.get(msgBean.getMsg());
+                                    channelHandlerL.onLeave(msgBean.getMsg()); //渠道号
+
+                                    break;
+
+                                case 98:   // 加入频道后也返回
+                                    ChannelHandler channelHandlerJ = mHandlerMap.get(msgBean.getMsg());
+                                    channelHandlerJ.onJoined(msgBean.getMsg()); //渠道号
+
+                                    break;
+
                                 case 1:  // 心跳的回应
                                     Log.e("socketHeartRe", str);
                                     break;
-                                case 2:  //1-1收到的消息                      //根据不同的id从map中拿出然后回调回去
-                                    onGetPriMsg.onPersonalMsgGet(msgBean);
+                                case 2:  //1-1收到的消息
+
+                                    ((Activity) context).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            respListener.onGetPriMsg(msgBean);
+                                        }
+                                    });
+
                                     break;
                                 case 3:  //组队收到的消息
-                                    onGetPriMsg.onTeamMsgGet(msgBean);
+                                    ((Activity) context).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ChannelHandler channelHandlerG = mHandlerMap.get(msgBean.gettID());
+                                            channelHandlerG.onGetMsg(msgBean);
+                                        }
+                                    });
+
+
                                     break;
                             }
 
-                            // respListener.onSocketResponse(str);
                         }
                     }
 
@@ -366,11 +423,11 @@ public class Client {
             } catch (SocketException e1) {
                 e1.printStackTrace();//客户端主动socket.close()会调用这里 java.net.SocketException: Socket closed
             } catch (Exception e2) {
-                Log.v(TAG, "Rec :Exception");
+                Log.v(TAG, "Receive :Exception");
                 e2.printStackTrace();
             }
 
-            Log.v(TAG, "Rec :End");
+            Log.v(TAG, "Receive :End");
         }
     }
 
@@ -380,9 +437,8 @@ public class Client {
             @Override
             public void run() {
                 HashMap<String, String> heartParam = new HashMap<>();
-                heartParam.put(ImConstants.APP_ID, mInfoParam.get(ImConstants.APP_ID));
-                heartParam.put(ImConstants.SERVER_ID, mInfoParam.get(ImConstants.SERVER_ID));
-                heartParam.put(ImConstants.FUID, mInfoParam.get(ImConstants.FUID));
+                heartParam.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
+                heartParam.put(ImConstants.FUID, mInitInfo.get(ImConstants.FUID));
                 heartParam.put(ImConstants.HANDLER, "1");
                 heartParam.put(ImConstants.TID, "0"); // 固定
                 heartParam.put(ImConstants.MSG, "heart beat");
@@ -396,6 +452,6 @@ public class Client {
                     e.printStackTrace();
                 }
             }
-        }, 0, 20 * 1000);
+        }, 0, HbDelay * 1000);
     }
 }
