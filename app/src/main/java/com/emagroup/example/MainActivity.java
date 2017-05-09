@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,10 +11,8 @@ import android.widget.EditText;
 import com.emagroup.imsdk.EmaImSdk;
 import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
+import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
-import com.emagroup.imsdk.response.PrivateMsgResponse;
-import com.emagroup.imsdk.response.PublicMsgResponse;
-import com.emagroup.imsdk.response.SysExMsgResponse;
 import com.emagroup.imsdk.util.ToastHelper;
 
 import java.util.ArrayList;
@@ -23,63 +20,74 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button btLogin;
-    private Button btUpdatePubInfo;
-    private Button btSendPubMsg;
-    private RecyclerView recylerMsg;
-    private MsgAdapter mMsgAdapter;
-    private ArrayList<String> mDataList;
+    private EditText metAppId;
+    private EditText metSelfUid;
+    private EditText metMsgLimit;
+    private EditText metChannelId;
+    private Button btRegist;
     private Button btClearAll;
-    private Button btLongConnect;
-    private EditText etPriMsg;
-    private EditText etPubMsg;
+    private Button btStopIm;
+    private Button btSenfLongMsg;
+    private Button btSenfshortMsg;
     private Button btSenfPriMsg;
-    private EditText etPubid;
-    private EditText etPubhanler;
-    private EditText etPriid;
-    private EditText etPrihandler;
-    private EditText metSelfId;
-    private EditText metWorldId;
-    private EditText metUnionId;
-    private EditText metTeamId;
-    private Button btStopLongCnt;
-    private Button btUpdatePriInfo;
+    private Button btJoinSChannel;
+    private Button btJoinLChannel;
+    private Button btLeaveSChannel;
+    private Button btLeaveLChannel;
+    private RecyclerView recylerMsg;
+    private ArrayList<String> mDataList;
+    private MsgAdapter mMsgAdapter;
+    private EditText etAppId;
+    private EditText etUid;
+    private EditText etMsgLimit;
+    private EditText etChannelId;
+    private EditText etChangeChannelId;
+    private EditText etShortChannelId;
+    private EditText etShortMsg;
+    private EditText etLongChannelId;
+    private EditText etLongMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btLogin = (Button) findViewById(R.id.bt_init);
-        btUpdatePubInfo = (Button) findViewById(R.id.bt_update_pubinfo);
-        btUpdatePriInfo = (Button) findViewById(R.id.bt_update_priinfo);
-        btSendPubMsg = (Button) findViewById(R.id.bt_send_pub_msg);
-        btSenfPriMsg = (Button) findViewById(R.id.bt_send_pri_msg);
+        btRegist = (Button) findViewById(R.id.bt_regist);
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
-        btLongConnect = (Button) findViewById(R.id.bt_socket_build);
+        btStopIm = (Button) findViewById(R.id.bt_stop_im);
 
-        metSelfId = (EditText) findViewById(R.id.et_self_id);
-        metWorldId = (EditText) findViewById(R.id.et_world_id);
-        metUnionId = (EditText) findViewById(R.id.et_union_id);
-        metTeamId = (EditText) findViewById(R.id.et_team_id);
+        btSenfLongMsg = (Button) findViewById(R.id.bt_send_longmsg);
+        btSenfshortMsg = (Button) findViewById(R.id.bt_send_shortmsg);
+        btSenfPriMsg = (Button) findViewById(R.id.bt_send_primsg);
 
-        etPubMsg = (EditText) findViewById(R.id.et_pub_msg);
-        etPubid = (EditText) findViewById(R.id.et_pub_id);
-        etPubhanler = (EditText) findViewById(R.id.et_pub_handler);
-        etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
-        etPriid = (EditText) findViewById(R.id.et_pri_id);
-        etPrihandler = (EditText) findViewById(R.id.et_pri_handler);
+        btJoinSChannel = (Button) findViewById(R.id.bt_join_shortlink_channel);
+        btJoinLChannel = (Button) findViewById(R.id.bt_join_longlink_channel);
+        btLeaveSChannel = (Button) findViewById(R.id.bt_leave_shortid);
+        btLeaveLChannel = (Button) findViewById(R.id.bt_leave_longid);
 
-        btStopLongCnt = (Button) findViewById(R.id.bt_stop_long_cnt);
+        etAppId = (EditText) findViewById(R.id.et_app_id);
+        etUid = (EditText) findViewById(R.id.et_self_id);
+        etMsgLimit = (EditText) findViewById(R.id.et_msg_limit);
+        etChannelId = (EditText) findViewById(R.id.et_channel_id);
 
-        btLogin.setOnClickListener(this);
-        btUpdatePubInfo.setOnClickListener(this);
-        btUpdatePriInfo.setOnClickListener(this);
-        btSendPubMsg.setOnClickListener(this);
-        btSenfPriMsg.setOnClickListener(this);
+        etChangeChannelId = (EditText) findViewById(R.id.et_change_channel_id);
+
+        etShortChannelId = (EditText) findViewById(R.id.et_short_channelid);
+        etShortMsg = (EditText) findViewById(R.id.et_short_msg);
+        etLongChannelId = (EditText) findViewById(R.id.et_long_channelid);
+        etLongMsg = (EditText) findViewById(R.id.et_long_msg);
+
+        btRegist.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
-        btLongConnect.setOnClickListener(this);
-        btStopLongCnt.setOnClickListener(this);
+        btStopIm.setOnClickListener(this);
+        btSenfLongMsg.setOnClickListener(this);
+        btSenfshortMsg.setOnClickListener(this);
+        btSenfPriMsg.setOnClickListener(this);
+        btJoinSChannel.setOnClickListener(this);
+        btJoinLChannel.setOnClickListener(this);
+        btLeaveSChannel.setOnClickListener(this);
+        btLeaveLChannel.setOnClickListener(this);
 
         recylerMsg = (RecyclerView) findViewById(R.id.recycler_msg);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -89,177 +97,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mMsgAdapter = new MsgAdapter(mDataList);
         recylerMsg.setAdapter(mMsgAdapter);
 
-
-        doGetPublicMsg();
-        doGetSysExMsg();
-        doGetPrivateMsg();
     }
 
 
-    private void doInitAndbuildPubConnect() {
-
-        //初始化
-        HashMap<String, String> paramInit = new HashMap<>();
-        paramInit.put(ImConstants.SERVER_ID, "01");
-        paramInit.put(ImConstants.UID, metSelfId.getText().toString());
-        EmaImSdk.getInstance().init(this, paramInit, "a5fdfc18c72f4fc9602746ddec9f3b21"); //20007
-
-
-        //建立工会、世界的连接
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.UNION_ID, metUnionId.getText().toString());   // 没有就传 ""
-        param.put(ImConstants.WORLD_ID, metWorldId.getText().toString());
-        param.put(ImConstants.SYS_ID, "01");
-        param.put(ImConstants.EX_ID, "c");       //扩展字段，如不需要扩展频道，则不用传该字段
-        param.put(ImConstants.WORLD_LIMIT, "10");
-        param.put(ImConstants.UNION_LIMIT, "10");
-        param.put(ImConstants.SYS_LIMIT, "10");
-        param.put(ImConstants.EX_LIMIT, "10");
-        EmaImSdk.getInstance().buildPubConnect(param, 10);
-    }
-
-
-    private void doUpdate() {
-
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.UNION_ID, metUnionId.getText().toString());   // 改哪个传那个，短链改这两个
-        param.put(ImConstants.WORLD_ID, metWorldId.getText().toString());
-        param.put(ImConstants.SYS_ID, "01");
-        param.put(ImConstants.EX_ID, "c");
-        param.put(ImConstants.WORLD_LIMIT, "8");
-        param.put(ImConstants.UNION_LIMIT, "8");
-        param.put(ImConstants.SYS_LIMIT, "8");
-        param.put(ImConstants.EX_LIMIT, "8");
-        EmaImSdk.getInstance().updatePubInfo(param, new ImResponse() {
+    public void regist() {
+        HashMap<String, String> registParams = new HashMap<>();
+        registParams.put(ImConstants.APP_ID, "20007");
+        registParams.put(ImConstants.APP_KEY, "a5fdfc18c72f4fc9602746ddec9f3b21");
+        registParams.put(ImConstants.UID, "88");
+        registParams.put(ImConstants.MSG_NUM_LIMIT, "8"); // 该字段不传默认为10
+        registParams.put(ImConstants.SERVER_URL, "http://118.178.230.138:8080/");  //注意格式
+        EmaImSdk.getInstance().regist(registParams, new ImResponse() {
             @Override
-            public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this, "updateInfo success");
+            public void onSuccessed() {
+
+            }
+
+            @Override
+            public void onFailed() {
+
+            }
+
+            @Override
+            public void onStoped() {
+
+            }
+
+            @Override
+            public void onGetPriMsg() {
+
             }
         });
     }
 
-    private void doGetPublicMsg() {
-        EmaImSdk.getInstance().getPubMsg(new PublicMsgResponse() {
-            @Override
-            public void onUnionMsgGet(MsgBean UnionMsgBean) {
+    public void joinShortChannel() {
 
-                mDataList.add("公会：" + UnionMsgBean.getMsg()+" from id "+UnionMsgBean.getFuid());
+        EmaImSdk.getInstance().joinShortLinkChannel("room01", new ChannelHandler() {
+            @Override
+            public void onJoined(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onJoined succ");
+            }
+
+            @Override
+            public void onGetMsg(MsgBean msgBean) {
+                mDataList.add(msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
-
-                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
             @Override
-            public void onWorldMsgGet(MsgBean worldMsgBean) {
-
-                mDataList.add("世界：" + worldMsgBean.getMsg()+" from id "+worldMsgBean.getFuid());
-                mMsgAdapter.notifyDataSetChanged();
-
-                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
-            }
-
-        });
-
-    }
-
-    private void doGetSysExMsg(){
-        EmaImSdk.getInstance().getSysExMsg(new SysExMsgResponse() {
-            @Override
-            public void onSysMsgGet(MsgBean sysMsgBean) {
-                mDataList.add("系统："+sysMsgBean.getMsg()+" from id "+sysMsgBean.getFuid());
-                mMsgAdapter.notifyDataSetChanged();
-
-                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
-            }
-
-            @Override
-            public void onExMsgGet(MsgBean exMsgBean) {
-                mDataList.add("扩展 :"+ exMsgBean.getMsg()+" from id "+exMsgBean.getFuid());
-                mMsgAdapter.notifyDataSetChanged();
-
-                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
+            public void onStop(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onStop succ");
             }
         });
     }
 
-    private void doSendPublicMsg() {
-
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.FNAME, "user"+metSelfId.getText().toString());
-        param.put(ImConstants.HANDLER, etPubhanler.getText().toString());    // 5世界 4工会
-        param.put(ImConstants.TID, etPubid.getText().toString());
-        param.put(ImConstants.MSG, etPubMsg.getText().toString());
-        EmaImSdk.getInstance().sendPubMsg(param);
+    public void sendShortMsg() {
+        EmaImSdk.getInstance().sendShortLinkMsg("room01", "大哥大", "woshidageda");
     }
 
-
-    /**
-     * 队伍私聊前建立长连接
-     */
-    private void dobuildConnect() {
-        EmaImSdk.getInstance().buildPriConnect(new ImResponse() {
-            @Override
-            public void onSuccessResponse() {
-                ToastHelper.toast(MainActivity.this, "buildLongConnect success");
-            }
-        });
+    public void leaveShortChannel() {
+        EmaImSdk.getInstance().leaveShortLinkChannel("room01");
     }
 
-
-    /**
-     * 发送私人组队消息
-     */
-    private void doSendPrivateMsg() {
-        String s = etPriMsg.getText().toString();
-        String[] split = s.split(",");
-
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.FNAME, "user"+metSelfId.getText().toString());
-        param.put(ImConstants.HANDLER, etPrihandler.getText().toString());    // 2私聊 3队伍
-        param.put(ImConstants.TID, etPriid.getText().toString());
-        param.put(ImConstants.MSG, etPriMsg.getText().toString());
-        EmaImSdk.getInstance().sendPriMsg(param);
-    }
-
-    private void doGetPrivateMsg() {
-        EmaImSdk.getInstance().getPriMsg(new PrivateMsgResponse() {
-            @Override
-            public void onPersonalMsgGet(final MsgBean MsgBean) {
-                Log.e("Personal", MsgBean.getMsg());
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDataList.add("私聊：" + MsgBean.getMsg());
-                        mMsgAdapter.notifyDataSetChanged();
-                        recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
-                    }
-                });
-            }
-
-            @Override
-            public void onTeamMsgGet(final MsgBean MsgBean) {
-                Log.e("Team", MsgBean.getMsg());
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDataList.add("队伍：" + MsgBean.getMsg());
-                        mMsgAdapter.notifyDataSetChanged();
-                        recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
-                    }
-                });
-            }
-
-        });
-    }
-
-    private void doupdateTeamInfo() {
-
-        HashMap<String, String> param = new HashMap<>();
-
-        param.put(ImConstants.MSG, metTeamId.getText().toString());
-
-        EmaImSdk.getInstance().updateTeamInfo(param);
-    }
 
     private void doStopPriConnect() {
         EmaImSdk.getInstance().stopPriConnect();
@@ -269,30 +168,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.bt_init:
-                doInitAndbuildPubConnect();
-                break;
-            case R.id.bt_update_pubinfo:
-                doUpdate();
-                break;
-            case R.id.bt_update_priinfo:
-                doupdateTeamInfo();
-                break;
-            case R.id.bt_send_pub_msg:
-                doSendPublicMsg();
-                break;
-            case R.id.bt_socket_build:
-                dobuildConnect();
-                break;
-            case R.id.bt_send_pri_msg:
-                doSendPrivateMsg();
+            case R.id.bt_regist:
+                regist();
                 break;
             case R.id.bt_clear_all:
                 mDataList.clear();
                 mMsgAdapter.notifyDataSetChanged();
                 break;
-            case R.id.bt_stop_long_cnt:
-                doStopPriConnect();
+            case R.id.bt_stop_im:
+
+                break;
+
+            case R.id.bt_join_shortlink_channel:
+                joinShortChannel();
+                break;
+            case R.id.bt_send_shortmsg:
+                sendShortMsg();
+                break;
+            case R.id.bt_leave_shortid:
+                leaveShortChannel();
                 break;
         }
 

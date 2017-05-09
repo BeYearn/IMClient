@@ -32,6 +32,13 @@
             android:orientation="vertical">
 
             <EditText
+                android:id="@+id/et_app_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="appid"
+                android:text="a" />
+
+            <EditText
                 android:id="@+id/et_self_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -39,26 +46,25 @@
                 android:text="8" />
 
             <EditText
-                android:id="@+id/et_world_id"
+                android:id="@+id/et_msg_limit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="worldid"
-                android:text="a" />
+                android:hint="msg_limit"
+                android:text="10" />
 
             <EditText
-                android:id="@+id/et_union_id"
+                android:id="@+id/et_channel_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="unionid"
-                android:text="c工会" />
+                android:hint="channelId"
+                android:text="channel01"/>
 
-            <EditText
-                android:id="@+id/et_team_id"
+            <Button
+                android:id="@+id/bt_regist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="teamid"
-                android:text="123"
-                android:textColor="@android:color/holo_red_dark" />
+                android:text="注册/登录" />
+
         </LinearLayout>
 
     </LinearLayout>
@@ -73,51 +79,60 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/bt_update_pubinfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="更新pub信息" />
 
-            <Button
-                android:id="@+id/bt_update_priinfo"
+            <EditText
+                android:id="@+id/et_change_channel_id"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="更新pri信息" />
-
-            <Button
-                android:id="@+id/bt_stop_long_cnt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
-                android:text="停止长连接" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/bt_init"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="初始化IM" />
-
-            <Button
-                android:id="@+id/bt_socket_build"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="建立长连接" />
+                android:layout_height="match_parent"
+                android:layout_marginRight="90dp"
+                android:background="@color/colorPrimary"
+                android:gravity="center"
+                android:hint="channelId"
+                android:text="4" />
 
             <Button
                 android:id="@+id/bt_clear_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="清屏" />
+
+            <Button
+                android:id="@+id/bt_stop_im"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="停止im" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/bt_join_shortlink_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="加入短频道" />
+
+            <Button
+                android:id="@+id/bt_join_longlink_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="加入长频道" />
+
+            <Button
+                android:id="@+id/bt_leave_shortid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="离开短频道" />
+
+            <Button
+                android:id="@+id/bt_leave_longid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="离开长频道" />
         </LinearLayout>
 
         <LinearLayout
@@ -126,35 +141,28 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/et_pub_handler"
+                android:id="@+id/et_short_channelid"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:hint="handler"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="to id"
                 android:text="4" />
 
             <EditText
-                android:id="@+id/et_pub_id"
+                android:id="@+id/et_short_msg"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:hint="pubid"
-                android:text="c工会" />
-
-            <EditText
-                android:id="@+id/et_pub_msg"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="2"
                 android:hint="msg"
-                android:text="pubms" />
+                android:text="msgxxx" />
 
             <Button
-                android:id="@+id/bt_send_pub_msg"
+                android:id="@+id/bt_send_shortmsg"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="发公/世信息" />
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="发短消息" />
+
 
         </LinearLayout>
 
@@ -164,37 +172,59 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/et_pri_handler"
+                android:id="@+id/et_long_channelid"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:hint="handler"
-                android:text="2" />
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="to id"
+                android:text="4" />
 
             <EditText
-                android:id="@+id/et_pri_id"
+                android:id="@+id/et_long_msg"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:hint="pubid"
-                android:text="100" />
+                android:hint="msg"
+                android:text="msgxxx" />
+
+            <Button
+                android:id="@+id/bt_send_longmsg"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="发长消息" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/et_uid"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="to id"
+                android:text="4" />
 
             <EditText
                 android:id="@+id/et_pri_msg"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="2"
                 android:hint="msg"
-                android:text="primsg" />
+                android:text="msgxxx" />
 
             <Button
-                android:id="@+id/bt_send_pri_msg"
+                android:id="@+id/bt_send_primsg"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="发私/队消息" />
-        </LinearLayout>
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="发私人信息" />
 
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

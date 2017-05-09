@@ -5,5 +5,11 @@ package com.emagroup.imsdk.response;
  */
 
 public interface ImResponse {
-    void onSuccessResponse();
+    void onSuccessed();
+
+    void onFailed();
+
+    void onStoped();
+
+    void onGetPriMsg();  // 收私人消息
 }

@@ -6,8 +6,10 @@ import android.util.Log;
 
 import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
+import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.PrivateMsgResponse;
+import com.emagroup.imsdk.util.MsgQueue;
 
 import org.json.JSONObject;
 
@@ -46,8 +48,6 @@ public class Client {
     private int state = STATE_CONNECT_START;
 
     private Socket socket = null;
-    //private OutputStream outStream = null;
-    //private InputStream inStream = null;
 
     private BufferedReader reader;
     private BufferedWriter writer;
@@ -65,6 +65,9 @@ public class Client {
     private HashMap<String, String> mInfoParam;
     private Timer mHeartTimer;
 
+    private HashMap<String, ChannelHandler> mHandlerMap;
+    private HashMap<String, MsgQueue> mMsgQueueMap;
+
 
     public static Client getInstance() {
         if (mInstance == null) {
@@ -75,6 +78,9 @@ public class Client {
     }
 
     private Client() {
+
+        mHandlerMap = new HashMap<>();
+        mMsgQueueMap =new HashMap<>();
     }
 
 
@@ -84,8 +90,9 @@ public class Client {
         this.mInfoParam = param;
     }
 
-    public void setOnGetPriMsg(PrivateMsgResponse onGetPriMsg) {
-        this.onGetPriMsg = onGetPriMsg;
+    public void setChannelHandler(String channelId, ChannelHandler handler) {
+        mHandlerMap.put(channelId,handler);
+        mMsgQueueMap.put(channelId,new MsgQueue());
     }
 
 
@@ -332,7 +339,7 @@ public class Client {
                                     break;
                                 case 96: //提交初始信息后服务器返会
 
-                                    respListener.onSuccessResponse();//连接成功回调
+                                    respListener.onSuccessed();//连接成功回调
 
                                     // 第三步开始维持心跳保持连接
                                     connectHeart();
@@ -341,7 +348,7 @@ public class Client {
                                 case 1:  // 心跳的回应
                                     Log.e("socketHeartRe", str);
                                     break;
-                                case 2:  //1-1收到的消息
+                                case 2:  //1-1收到的消息                      //根据不同的id从map中拿出然后回调回去
                                     onGetPriMsg.onPersonalMsgGet(msgBean);
                                     break;
                                 case 3:  //组队收到的消息

@@ -16,17 +16,17 @@ public class ConfigUtils {
     private static final String TAG = "ConfigUtils";
 
 
-    public static String getEnvi(Context context){
+    /*public static String getEnvi(Context context){
         return getStringFromMetaData(context, "EMA_WHICH_ENVI");
-    }
+    }*/
 
-    public static String getAppId(Context context){
+    /*public static String getAppId(Context context){
         return getStringFromMetaData(context,"EMA_APP_ID").substring(1);
-    }
+    }*/
 
-    public static String getChannelId(Context context){
+    /*public static String getChannelId(Context context){
         return getStringFromMetaData(context,"EMA_CHANNEL_ID").substring(1);
-    }
+    }*/
 
 
 

@@ -56,7 +56,7 @@ public class RunableRead implements Runnable {
 
                         break;
                     case 96: //提交初始信息后服务器返会
-                        mResponse.onSuccessResponse();//连接成功回调
+                        mResponse.onSuccessed();//连接成功回调
                         break;
                     case 1:  // 心跳的回应
                         Log.e("socketHeart", readMsg);

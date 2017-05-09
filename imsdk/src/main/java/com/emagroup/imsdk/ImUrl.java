@@ -1,10 +1,5 @@
 package com.emagroup.imsdk;
 
-import android.content.Context;
-
-import com.emagroup.imsdk.util.ConfigUtils;
-
-
 /**
  * Created by Administrator on 2017/4/13.
  */
@@ -22,6 +17,10 @@ public class ImUrl {
         return serverUrl + "ema-im/register/login";
     }
 
+    public static String getJoinChannelUrl() {
+        return serverUrl + "ema-im/register/joinChannels";
+    }
+
 
     public static String getUpdateInfoUrl() {
 
@@ -34,11 +33,15 @@ public class ImUrl {
     }
 
 
-    public static String getSendMdgUrl() {
+    public static String getSendMsgUrl() {
         return serverUrl + "ema-im/chat/sendMsg";
     }
 
-    public static void initUrl(Context context) {
+    public static String getLeaveChannelUrl(){
+        return serverUrl + "ema-im/register/leaveChannels";
+    }
+
+    /*public static void initUrl(Context context) {
         String emaEnvi = ConfigUtils.getEnvi(context);
         if ("staging".equals(emaEnvi)) {
             ImUrl.setServerUrl(ImUrl.STAGING_SERVER_URL);
@@ -47,7 +50,7 @@ public class ImUrl {
         } else if ("production".equals(emaEnvi)) {
             ImUrl.setServerUrl(ImUrl.PRODU_CTION_SERVER_URL);
         }
-    }
+    }*/
 
     public static String getServerUrl() {
         return serverUrl;
