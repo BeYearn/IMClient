@@ -418,8 +418,12 @@ public class EmaImSdk {
         client.close();
 
         //短链心跳的停止
-        mHeartTimer.cancel();
-        registResponse.onStoped();
+        if(mHeartTimer!=null){
+            mHeartTimer.cancel();
+        }
+        if(registResponse!=null){
+            registResponse.onStoped();
+        }
     }
 
 

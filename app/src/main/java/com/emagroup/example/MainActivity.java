@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onLeave(String channelId) {
-                ToastHelper.toast(MainActivity.this, "onJoined succ");
+                ToastHelper.toast(MainActivity.this, "onLeave succ");
             }
         });
     }
