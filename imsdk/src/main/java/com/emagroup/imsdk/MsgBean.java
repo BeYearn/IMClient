@@ -12,6 +12,7 @@ public class MsgBean {
     private String msg;
     private String msgId;
     private String tID;
+    private String ext;
 
     public String getAppId() {
         return appId;
@@ -67,5 +68,13 @@ public class MsgBean {
 
     public void settID(String tID) {
         this.tID = tID;
+    }
+
+    public String getExt() {
+        return ext;
+    }
+
+    public void setExt(String ext) {
+        this.ext = ext;
     }
 }

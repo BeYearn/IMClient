@@ -26,6 +26,7 @@ public class ImConstants {
     public static final String HANDLER = "handler";
     public static final String TID = "tId";
     public static final String MSG = "msg";
+    public static final String EXT = "ext";
     public static final String MSG_ID = "msgId";
     public static final String SIGN = "sign";
 

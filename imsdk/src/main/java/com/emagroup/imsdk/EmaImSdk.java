@@ -105,7 +105,7 @@ public class EmaImSdk {
      */
     public void regist(Activity activity, Map<String, String> params, ImResponse response) {
 
-        this.mActivity= activity;
+        this.mActivity = activity;
 
         mHandlerMap = new HashMap<>();
         mMsgQueueMap = new HashMap<>();
@@ -203,7 +203,7 @@ public class EmaImSdk {
      * @param channelId
      * @param msg
      */
-    public void sendShortLinkMsg(String channelId, String fName, String msg) {
+    public void sendShortLinkMsg(String channelId, String fName, String msg, String ext) {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
@@ -212,6 +212,7 @@ public class EmaImSdk {
         param.put(ImConstants.HANDLER, ImConstants.HANDLER_SHORT_LINK);
         param.put(ImConstants.TID, channelId);
         param.put(ImConstants.MSG, msg);
+        param.put(ImConstants.EXT,ext);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.TID) + mAppKey;
@@ -291,7 +292,7 @@ public class EmaImSdk {
      * @param channelId
      * @param msg
      */
-    public void sendLongLinkMsg(String channelId, String fName, String msg) {
+    public void sendLongLinkMsg(String channelId, String fName, String msg, String ext) {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
@@ -300,12 +301,14 @@ public class EmaImSdk {
         param.put(ImConstants.HANDLER, "3");
         param.put(ImConstants.TID, channelId);
         param.put(ImConstants.MSG, msg);
+        param.put(ImConstants.EXT,ext);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
 
         //把自己发的消息也回调出来   世界工会信息服务器是返回的
         String nName = param.get(ImConstants.FNAME);
         String nMsg = param.get(ImConstants.MSG);
+        String nExt = param.get(ImConstants.EXT);
         String nHandler = param.get(ImConstants.HANDLER);
         String nTId = param.get(ImConstants.TID);
         MsgBean msgBean = new MsgBean();
@@ -314,6 +317,7 @@ public class EmaImSdk {
         msgBean.setFuid(mUid);
         msgBean.setHandler(nHandler);
         msgBean.setMsg(nMsg);
+        msgBean.setExt(nExt);
         msgBean.setMsgId(System.currentTimeMillis() + "");
         msgBean.settID(nTId);
 
@@ -321,13 +325,13 @@ public class EmaImSdk {
         Client client = Client.getInstance();
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
-        client.send(packet,msgBean);
+        client.send(packet, msgBean);
     }
 
     /**
      * 发送私人消息
      */
-    public void sendPriMsg(String uid, String fName, String msg) {
+    public void sendPriMsg(String uid, String fName, String msg, String ext) {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
@@ -336,12 +340,14 @@ public class EmaImSdk {
         param.put(ImConstants.HANDLER, "2");
         param.put(ImConstants.TID, uid);
         param.put(ImConstants.MSG, msg);
+        param.put(ImConstants.EXT,ext);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
 
         //把自己发的消息也回调出来   世界工会信息服务器是返回的
         String nName = param.get(ImConstants.FNAME);
         String nMsg = param.get(ImConstants.MSG);
+        String nExt = param.get(ImConstants.EXT);
         String nHandler = param.get(ImConstants.HANDLER);
         String nTId = param.get(ImConstants.TID);
         MsgBean msgBean = new MsgBean();
@@ -350,13 +356,14 @@ public class EmaImSdk {
         msgBean.setFuid(mUid);
         msgBean.setHandler(nHandler);
         msgBean.setMsg(nMsg);
+        msgBean.setExt(nExt);
         msgBean.setMsgId(System.currentTimeMillis() + "");
         msgBean.settID(nTId);
 
         Client client = Client.getInstance();
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
-        client.send(packet,msgBean);
+        client.send(packet, msgBean);
     }
 
 
@@ -384,7 +391,7 @@ public class EmaImSdk {
     /**
      * 判断长连接是否连接成功
      */
-    public boolean isNeedReConnect(){
+    public boolean isNeedReConnect() {
         Client client = Client.getInstance();
         return client.isNeedConn();
     }
@@ -392,7 +399,7 @@ public class EmaImSdk {
     /**
      * 长连接重新连接
      */
-    public void longLinkReConnect(){
+    public void longLinkReConnect() {
         Client client = Client.getInstance();
         client.reconn();
     }
@@ -418,10 +425,10 @@ public class EmaImSdk {
         client.close();
 
         //短链心跳的停止
-        if(mHeartTimer!=null){
+        if (mHeartTimer != null) {
             mHeartTimer.cancel();
         }
-        if(registResponse!=null){
+        if (registResponse != null) {
             registResponse.onStoped();
         }
     }
@@ -595,6 +602,7 @@ public class EmaImSdk {
             msgBean.setFuid(obj.getString("fUid"));
             msgBean.setHandler(obj.getString("handler"));
             msgBean.setMsg(obj.getString("msg"));
+            msgBean.setExt(obj.getString("ext"));
             msgBean.setMsgId(obj.getString("msgId"));
             msgBean.settID(obj.getString("tId"));
         } catch (Exception e) {

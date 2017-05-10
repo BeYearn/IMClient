@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void sendShortMsg() {
-        EmaImSdk.getInstance().sendShortLinkMsg(etShortChannelId.getText().toString(), etSelfUid.getText().toString(), etShortMsg.getText().toString());
+        EmaImSdk.getInstance().sendShortLinkMsg(etShortChannelId.getText().toString(), etSelfUid.getText().toString(), etShortMsg.getText().toString(),"ext");
     }
 
     public void leaveShortChannel() {
@@ -200,11 +200,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void sendLongMsg() {
-        EmaImSdk.getInstance().sendLongLinkMsg(etLongChannelId.getText().toString(), etSelfUid.getText().toString(), etLongMsg.getText().toString());
+        EmaImSdk.getInstance().sendLongLinkMsg(etLongChannelId.getText().toString(), etSelfUid.getText().toString(), etLongMsg.getText().toString(),"ext");
     }
 
     public void sendPriMsg() {
-        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(), etSelfUid.getText().toString(), etPriMsg.getText().toString());
+        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(), etSelfUid.getText().toString(), etPriMsg.getText().toString(),"ext");
     }
 
     public void leaveLongChannel() {
