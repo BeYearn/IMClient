@@ -326,7 +326,7 @@ public class Client {
                 }
             } catch (SocketException e1) {
                 e1.printStackTrace();//发送的时候出现异常，说明socket被关闭了(服务器关闭)java.net.SocketException: sendto failed: EPIPE (Broken pipe)
-                reconn();
+                //reconn();
             } catch (Exception e) {
                 Log.v(TAG, "Send ::Exception");
                 e.printStackTrace();
@@ -417,7 +417,7 @@ public class Client {
                         }
                     }
 
-                    reconn();//走到这一步，说明服务器socket断了
+                    //reconn();//走到这一步，说明服务器socket断了
                     break;
                 }
             } catch (SocketException e1) {

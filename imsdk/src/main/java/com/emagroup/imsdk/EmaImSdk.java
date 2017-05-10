@@ -10,9 +10,6 @@ import com.emagroup.imsdk.client.Client;
 import com.emagroup.imsdk.client.Packet;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
-import com.emagroup.imsdk.response.PrivateMsgResponse;
-import com.emagroup.imsdk.response.PublicMsgResponse;
-import com.emagroup.imsdk.response.SysExMsgResponse;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
 import com.emagroup.imsdk.util.MsgQueue;
@@ -40,16 +37,11 @@ public class EmaImSdk {
     private String mServerHost;
     private ImResponse registResponse;
 
-    private PublicMsgResponse mPublicMsgResponse;
-    private PrivateMsgResponse mPrivateMsgResponse;
-    private SysExMsgResponse mSysMsgResponse;
-
     private int mShortHeartDelay;
     private int mLongHeartDelay;
 
     private String mMsgLimit;
     private String mUid;
-    private String mServerId;
     private static String mAppKey;
     private static String mAppId;
 
@@ -387,6 +379,22 @@ public class EmaImSdk {
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
         client.send(packet);
+    }
+
+    /**
+     * 判断长连接是否连接成功
+     */
+    public boolean isNeedReConnect(){
+        Client client = Client.getInstance();
+        return client.isNeedConn();
+    }
+
+    /**
+     * 长连接重新连接
+     */
+    public void longLinkReConnect(){
+        Client client = Client.getInstance();
+        client.reconn();
     }
 
     /**

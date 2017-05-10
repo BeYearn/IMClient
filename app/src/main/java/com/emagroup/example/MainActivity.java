@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText etLongMsg;
     private EditText etPriUid;
     private EditText etPriMsg;
+    private Button btIsLongLinked;
+    private Button btLongReconec;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         btRegist = (Button) findViewById(R.id.bt_regist);
+        btIsLongLinked = (Button) findViewById(R.id.bt_long_islinked);
+        btLongReconec = (Button) findViewById(R.id.bt_long_reconnec);
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
         btStopIm = (Button) findViewById(R.id.bt_stop_im);
 
@@ -79,11 +83,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etShortMsg = (EditText) findViewById(R.id.et_short_msg);
         etLongChannelId = (EditText) findViewById(R.id.et_long_channelid);
         etLongMsg = (EditText) findViewById(R.id.et_long_msg);
-        etPriUid = (EditText)findViewById(R.id.et_pri_uid);
-        etPriMsg =(EditText)findViewById(R.id.et_pri_msg);
+        etPriUid = (EditText) findViewById(R.id.et_pri_uid);
+        etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
 
 
         btRegist.setOnClickListener(this);
+        btIsLongLinked.setOnClickListener(this);
+        btLongReconec.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
         btStopIm.setOnClickListener(this);
         btSenfLongMsg.setOnClickListener(this);
@@ -115,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         registParams.put(ImConstants.SHORT_HEARTBEAT_DELAY, "10");
         registParams.put(ImConstants.LONG_HEARTBEAT_DELAY, "20");
-        EmaImSdk.getInstance().regist(this,registParams, new ImResponse() {
+        EmaImSdk.getInstance().regist(this, registParams, new ImResponse() {
 
             @Override
             public void onSuccessed() {
@@ -134,9 +140,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetPriMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getFuid()+" : "+msgBean.getMsg());
+                mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
-                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
         });
     }
@@ -151,9 +157,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getFuid()+" : "+msgBean.getMsg());
+                mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
-                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
             @Override
@@ -181,9 +187,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getFuid()+" : "+msgBean.getMsg());
+                mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
-                recylerMsg.smoothScrollToPosition(mDataList.size()-1);
+                recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
             @Override
@@ -197,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         EmaImSdk.getInstance().sendLongLinkMsg(etLongChannelId.getText().toString(), etSelfUid.getText().toString(), etLongMsg.getText().toString());
     }
 
-    public void sendPriMsg(){
-        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(),etSelfUid.getText().toString(),etPriMsg.getText().toString());
+    public void sendPriMsg() {
+        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(), etSelfUid.getText().toString(), etPriMsg.getText().toString());
     }
 
     public void leaveLongChannel() {
@@ -215,6 +221,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.bt_regist:
                 regist();
+                break;
+            case R.id.bt_long_islinked:
+                isLongLinked();
+                break;
+            case R.id.bt_long_reconnec:
+                longReconec();
                 break;
             case R.id.bt_clear_all:
                 mDataList.clear();
@@ -248,6 +260,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
+    }
+
+    private void longReconec() {
+        EmaImSdk.getInstance().longLinkReConnect();
+    }
+
+    private void isLongLinked() {
+        if (EmaImSdk.getInstance().isNeedReConnect()) {
+            ToastHelper.toast(MainActivity.this, "需要");
+        }else{
+            ToastHelper.toast(MainActivity.this, "不用");
+        }
     }
 
 
