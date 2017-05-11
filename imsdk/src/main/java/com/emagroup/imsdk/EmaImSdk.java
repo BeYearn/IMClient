@@ -80,6 +80,7 @@ public class EmaImSdk {
     };
     private Timer mHeartTimer;
     private Activity mActivity;
+    private boolean isRegist = false;
 
     private EmaImSdk() {
     }
@@ -125,6 +126,7 @@ public class EmaImSdk {
         } else {
             ImUrl.setServerUrl(url);
             this.registResponse = response;
+            this.isRegist = true;   //用来限制在两个加入频道时得先regist(保证上面两个map及初始参数已提交）
         }
 
         try {
@@ -151,6 +153,11 @@ public class EmaImSdk {
      * @param handler   加入成功，停止成功，接收消息
      */
     public void joinShortLinkChannel(String channelId, final ChannelHandler handler) {
+
+        if (!isRegist) {
+            Log.e("joinShortLink", "error : please regist first");
+            return;
+        }
 
         mHandlerMap.put(channelId, handler);
         mMsgQueueMap.put(channelId, new MsgQueue());
@@ -212,7 +219,7 @@ public class EmaImSdk {
         param.put(ImConstants.HANDLER, ImConstants.HANDLER_SHORT_LINK);
         param.put(ImConstants.TID, channelId);
         param.put(ImConstants.MSG, msg);
-        param.put(ImConstants.EXT,ext);
+        param.put(ImConstants.EXT, ext);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         String sign = param.get(ImConstants.APP_ID) + param.get(ImConstants.FNAME) + param.get(ImConstants.FUID) + param.get(ImConstants.HANDLER) + param.get(ImConstants.MSG) + param.get(ImConstants.MSG_ID) + param.get(ImConstants.TID) + mAppKey;
@@ -282,6 +289,11 @@ public class EmaImSdk {
      */
     public void joinLongLinkChannel(String channelId, ChannelHandler handler) {
 
+        if (!isRegist) {
+            Log.e("joinLongLink", "error : please regist first");
+            return;
+        }
+
         Client client = Client.getInstance();
         client.joinChannel(channelId, handler);
     }
@@ -301,7 +313,7 @@ public class EmaImSdk {
         param.put(ImConstants.HANDLER, "3");
         param.put(ImConstants.TID, channelId);
         param.put(ImConstants.MSG, msg);
-        param.put(ImConstants.EXT,ext);
+        param.put(ImConstants.EXT, ext);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
 
@@ -340,7 +352,7 @@ public class EmaImSdk {
         param.put(ImConstants.HANDLER, "2");
         param.put(ImConstants.TID, uid);
         param.put(ImConstants.MSG, msg);
-        param.put(ImConstants.EXT,ext);
+        param.put(ImConstants.EXT, ext);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
 
