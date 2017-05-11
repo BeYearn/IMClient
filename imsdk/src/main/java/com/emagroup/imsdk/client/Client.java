@@ -115,7 +115,7 @@ public class Client {
         return in.getId();
     }
 
-    public int send(Packet in, MsgBean selfMsgBean) {
+   /* public int send(Packet in, MsgBean selfMsgBean) {
 
         if (selfMsgBean.getHandler().equals("3")) {   //长连接频道
             ChannelHandler channelHandler = mHandlerMap.get(selfMsgBean.gettID());
@@ -131,7 +131,7 @@ public class Client {
             lock.notifyAll();
         }
         return in.getId();
-    }
+    }*/
 
     public void cancel(int reqId) {
         Iterator<Packet> mIterator = requestQueen.iterator();

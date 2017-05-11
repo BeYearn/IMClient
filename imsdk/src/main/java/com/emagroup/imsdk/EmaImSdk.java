@@ -305,7 +305,7 @@ public class EmaImSdk {
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
 
-        //把自己发的消息也回调出来   世界工会信息服务器是返回的
+        /*//把自己发的消息也回调出来   世界工会信息服务器是返回的
         String nName = param.get(ImConstants.FNAME);
         String nMsg = param.get(ImConstants.MSG);
         String nExt = param.get(ImConstants.EXT);
@@ -319,13 +319,13 @@ public class EmaImSdk {
         msgBean.setMsg(nMsg);
         msgBean.setExt(nExt);
         msgBean.setMsgId(System.currentTimeMillis() + "");
-        msgBean.settID(nTId);
+        msgBean.settID(nTId);*/
 
 
         Client client = Client.getInstance();
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
-        client.send(packet, msgBean);
+        client.send(packet);
     }
 
     /**
@@ -344,7 +344,7 @@ public class EmaImSdk {
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
 
-        //把自己发的消息也回调出来   世界工会信息服务器是返回的
+        /*//把自己发的消息也回调出来   世界工会信息服务器是返回的
         String nName = param.get(ImConstants.FNAME);
         String nMsg = param.get(ImConstants.MSG);
         String nExt = param.get(ImConstants.EXT);
@@ -358,12 +358,12 @@ public class EmaImSdk {
         msgBean.setMsg(nMsg);
         msgBean.setExt(nExt);
         msgBean.setMsgId(System.currentTimeMillis() + "");
-        msgBean.settID(nTId);
+        msgBean.settID(nTId);*/
 
         Client client = Client.getInstance();
         Packet packet = new Packet();
         packet.setData(new JSONObject(param).toString());
-        client.send(packet, msgBean);
+        client.send(packet);
     }
 
 
