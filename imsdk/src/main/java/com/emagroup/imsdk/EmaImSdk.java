@@ -420,17 +420,22 @@ public class EmaImSdk {
      * 停止im
      */
     public void stop() {
-        //长连接的停止
+        //长连接  退出所有频道，然后停止
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.HANDLER, "99"); //退出服务器
+        param.put(ImConstants.HANDLER, "100"); //退出所有长连接频道
         param.put(ImConstants.TID, "0");  //固定 告诉服务器
         param.put(ImConstants.MSG, "");
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
         Client client = Client.getInstance();
+
         Packet packet = new Packet();
+        packet.setData(new JSONObject(param).toString());
+        client.send(packet);
+
+        param.put(ImConstants.HANDLER, "99"); //退出服务器
         packet.setData(new JSONObject(param).toString());
         client.send(packet);
 
