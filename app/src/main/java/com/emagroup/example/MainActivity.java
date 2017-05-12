@@ -151,8 +151,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         EmaImSdk.getInstance().joinShortLinkChannel(etChangeChannelId.getText().toString(), new ChannelHandler() {
             @Override
-            public void onJoined(String channelId) {
-                ToastHelper.toast(MainActivity.this, "onJoined succ");
+            public void onJoineSucc(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onJoineSucc succ");
             }
 
             @Override
@@ -163,8 +163,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void onLeave(String channelId) {
-                ToastHelper.toast(MainActivity.this, "onLeave succ");
+            public void onLeaveSucc(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onLeaveSucc succ");
             }
         });
     }
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void joinLongChannel() {
         EmaImSdk.getInstance().joinLongLinkChannel(etChangeChannelId.getText().toString(), new ChannelHandler() {
             @Override
-            public void onJoined(String channelId) {
+            public void onJoineSucc(String channelId) {
                 ToastHelper.toast(MainActivity.this, "joinLongChannel succ");
             }
 
@@ -193,8 +193,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void onLeave(String channelId) {
-                ToastHelper.toast(MainActivity.this, "onLeave succ");
+            public void onLeaveSucc(String channelId) {
+                ToastHelper.toast(MainActivity.this, "onLeaveSucc succ");
             }
         });
     }

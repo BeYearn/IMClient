@@ -9,6 +9,7 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.SendResponse;
 
 import org.json.JSONObject;
 
@@ -68,6 +69,14 @@ public class Client {
     //private HashMap<String, MsgQueue> mMsgQueueMap;
     private int HbDelay;
 
+    private String mMarkHandler; // 用来标记当前最后一个是什么操作，以及对应的失败回调;仅加入退出频道用
+    private String mMarkChannelId; // 用来寻找对应的回调handler 来回调成功还是失败
+    private int mMarkJoL;  // 用来标记此时做的加入还是离开操作
+    private int JOIN = 11;
+    private int LEAVE = 12;
+
+    private String mMarkMsg;
+
 
     public static Client getInstance() {
         if (mInstance == null) {
@@ -91,6 +100,7 @@ public class Client {
     }
 
     public void joinChannel(String channelId, ChannelHandler handler) {
+
         mHandlerMap.put(channelId, handler);
         //mMsgQueueMap.put(channelId, new MsgQueue());
 
@@ -102,8 +112,54 @@ public class Client {
         joinParam.put(ImConstants.MSG, channelId);
         joinParam.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
+        mMarkHandler = joinParam.get(ImConstants.HANDLER);
+        mMarkChannelId = channelId;
+        mMarkJoL = JOIN;
+
+
         String joinMsg = new JSONObject(joinParam).toString();
         send(new Packet(joinMsg));
+    }
+
+    public void sendMsg(String channelId, String fName, String msg, String ext, SendResponse sendResponse, String handler) {
+
+        String currentTime = System.currentTimeMillis() + "";
+        String shortTime = currentTime.substring(8, 13);
+
+        mMarkMsg = shortTime;
+
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
+        param.put(ImConstants.FNAME, fName);
+        param.put(ImConstants.FUID, mInitInfo.get(ImConstants.FUID));
+        param.put(ImConstants.HANDLER, handler);
+        param.put(ImConstants.TID, channelId);
+        param.put(ImConstants.MSG, msg);
+        param.put(ImConstants.EXT, ext);
+        param.put(ImConstants.MSG_ID, currentTime);
+        param.put(ImConstants.MARK, shortTime);
+
+        String joinMsg = new JSONObject(param).toString();
+        send(new Packet(joinMsg));
+    }
+
+    public void leaveChannel(String channelId) {
+
+        HashMap<String, String> param = new HashMap<>();
+        param.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
+        param.put(ImConstants.FUID, mInitInfo.get(ImConstants.FUID));
+        param.put(ImConstants.HANDLER, "97");
+        param.put(ImConstants.TID, "0");
+        param.put(ImConstants.MSG, channelId);
+        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
+        mMarkHandler = param.get(ImConstants.HANDLER);
+        mMarkChannelId = channelId;
+        mMarkJoL = LEAVE;
+
+        String leaveMsg = new JSONObject(param).toString();
+        send(new Packet(leaveMsg));
+
     }
 
 
@@ -343,13 +399,15 @@ public class Client {
             try {
                 while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != reader) {
                     Log.v(TAG, "Receive :---------");
+
                     String str = null;
+                    final MsgBean msgBean = new MsgBean();
+
                     while ((str = reader.readLine()) != null) {    //误以为readLine()是读取到没有数据时就返回null(因为其它read方法当读到没有数据时返回-1)，而实际上readLine()是一个阻塞函数，当没有数据读取时，就一直会阻塞在那，而不是返回null；readLine()只有在数据流发生异常或者另一端被close()掉时，才会返回null值。
                         if (null != respListener) {
 
                             JSONObject strFromSocket = new JSONObject(str);
 
-                            final MsgBean msgBean = new MsgBean();
                             msgBean.setAppId(strFromSocket.getString("appId"));
                             msgBean.setfName(strFromSocket.getString("fName"));
                             msgBean.setFuid(strFromSocket.getString("fUid"));
@@ -379,19 +437,20 @@ public class Client {
                                 case 97:   //退出频道后会原样反回
 
                                     ChannelHandler channelHandlerL = mHandlerMap.get(msgBean.getMsg());
-                                    channelHandlerL.onLeave(msgBean.getMsg()); //渠道号
+                                    channelHandlerL.onLeaveSucc(msgBean.getMsg()); //渠道号
 
                                     break;
 
                                 case 98:   // 加入频道后也返回
                                     ChannelHandler channelHandlerJ = mHandlerMap.get(msgBean.getMsg());
-                                    channelHandlerJ.onJoined(msgBean.getMsg()); //渠道号
+                                    channelHandlerJ.onJoineSucc(msgBean.getMsg()); //渠道号
 
                                     break;
 
                                 case 1:  // 心跳的回应
                                     Log.e("socketHeartRe", str);
                                     break;
+
                                 case 2:  //1-1收到的消息
 
                                     ((Activity) context).runOnUiThread(new Runnable() {
@@ -410,15 +469,21 @@ public class Client {
                                             channelHandlerG.onGetMsg(msgBean);
                                         }
                                     });
-
-
                                     break;
                             }
+                        }
+                    }
+                    //reconn();//走到这一步，说明服务器socket断了
 
+                    if (msgBean.getHandler().equals(mMarkHandler)) {
+                        ChannelHandler markHandler = mHandlerMap.get(mMarkChannelId);
+                        if (mMarkJoL == JOIN) {
+                            markHandler.onJoinFail();
+                        } else if (mMarkJoL == LEAVE) {
+                            markHandler.onLeaveFail();
                         }
                     }
 
-                    //reconn();//走到这一步，说明服务器socket断了
                     break;
                 }
             } catch (SocketException e1) {

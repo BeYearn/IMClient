@@ -8,9 +8,13 @@ import com.emagroup.imsdk.MsgBean;
 
 public interface ChannelHandler {
 
-    void onJoined(String channelId);
+    void onJoineSucc(String channelId);
+
+    void onJoinFail();
 
     void onGetMsg(MsgBean msgBean);
 
-    void onLeave(String channelId);
+    void onLeaveSucc(String channelId);
+
+    void onLeaveFail();
 }

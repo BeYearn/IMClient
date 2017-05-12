@@ -10,6 +10,7 @@ import com.emagroup.imsdk.client.Client;
 import com.emagroup.imsdk.client.Packet;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
 import com.emagroup.imsdk.util.MsgQueue;
@@ -186,9 +187,12 @@ public class EmaImSdk {
                     JSONArray channelIdArr = data.getJSONArray("channelId");
                     String strid = (String) channelIdArr.get(0);  //现在加入离开都只是一个个的，所以取去第一个好了
 
+                    ChannelHandler channelHandler = mHandlerMap.get(strid);
+
                     if (0 == status) {
-                        ChannelHandler channelHandler = mHandlerMap.get(strid);
-                        channelHandler.onJoined(strid);
+                        channelHandler.onJoineSucc(strid);
+                    }else {
+                        channelHandler.onJoinFail();
                     }
 
                     if (mFirstJoin) {
@@ -210,7 +214,7 @@ public class EmaImSdk {
      * @param channelId
      * @param msg
      */
-    public void sendShortLinkMsg(String channelId, String fName, String msg, String ext) {
+    public void sendShortLinkMsg(String channelId, String fName, String msg, String ext, final SendResponse sendResponse) {
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
@@ -230,7 +234,17 @@ public class EmaImSdk {
             public void OnResponse(String result) {
                 try {
 
-                    handleMsgResult(result);   //发送信息（同时获取聊天信息）  发的越快收的越快
+                    JSONObject jsonObject = new JSONObject(result);
+                    int status = jsonObject.getInt("status");
+
+                    if(0==status){
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        handleMsgResult(data);   //发送信息（同时获取聊天信息）  发的越快收的越快
+                        sendResponse.onSendSucc();
+                    }else {
+                        sendResponse.onSendFail();
+                    }
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -268,9 +282,12 @@ public class EmaImSdk {
                     JSONArray channelIdArr = data.getJSONArray("channelId");
                     String strid = (String) channelIdArr.get(0);  //现在加入离开都只是一个个的，所以取去第一个好了
 
+                    ChannelHandler channelHandler = mHandlerMap.get(strid);
+
                     if (0 == status) {
-                        ChannelHandler channelHandler = mHandlerMap.get(strid);
-                        channelHandler.onLeave(strid);
+                        channelHandler.onLeaveSucc(strid);
+                    }else {
+                        channelHandler.onLeaveFail();
                     }
 
                 } catch (Exception e) {
@@ -304,78 +321,19 @@ public class EmaImSdk {
      * @param channelId
      * @param msg
      */
-    public void sendLongLinkMsg(String channelId, String fName, String msg, String ext) {
-
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.APP_ID, mAppId);
-        param.put(ImConstants.FNAME, fName);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.HANDLER, "3");
-        param.put(ImConstants.TID, channelId);
-        param.put(ImConstants.MSG, msg);
-        param.put(ImConstants.EXT, ext);
-        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-
-
-        /*//把自己发的消息也回调出来   世界工会信息服务器是返回的
-        String nName = param.get(ImConstants.FNAME);
-        String nMsg = param.get(ImConstants.MSG);
-        String nExt = param.get(ImConstants.EXT);
-        String nHandler = param.get(ImConstants.HANDLER);
-        String nTId = param.get(ImConstants.TID);
-        MsgBean msgBean = new MsgBean();
-        msgBean.setAppId(mAppId);
-        msgBean.setfName(nName);
-        msgBean.setFuid(mUid);
-        msgBean.setHandler(nHandler);
-        msgBean.setMsg(nMsg);
-        msgBean.setExt(nExt);
-        msgBean.setMsgId(System.currentTimeMillis() + "");
-        msgBean.settID(nTId);*/
-
+    public void sendLongLinkMsg(String channelId, String fName, String msg, String ext, SendResponse sendResponse) {
 
         Client client = Client.getInstance();
-        Packet packet = new Packet();
-        packet.setData(new JSONObject(param).toString());
-        client.send(packet);
+        client.sendMsg(channelId,fName,msg,ext,sendResponse,"3");
     }
 
     /**
      * 发送私人消息
      */
-    public void sendPriMsg(String uid, String fName, String msg, String ext) {
-
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.APP_ID, mAppId);
-        param.put(ImConstants.FNAME, fName);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.HANDLER, "2");
-        param.put(ImConstants.TID, uid);
-        param.put(ImConstants.MSG, msg);
-        param.put(ImConstants.EXT, ext);
-        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-
-
-        /*//把自己发的消息也回调出来   世界工会信息服务器是返回的
-        String nName = param.get(ImConstants.FNAME);
-        String nMsg = param.get(ImConstants.MSG);
-        String nExt = param.get(ImConstants.EXT);
-        String nHandler = param.get(ImConstants.HANDLER);
-        String nTId = param.get(ImConstants.TID);
-        MsgBean msgBean = new MsgBean();
-        msgBean.setAppId(mAppId);
-        msgBean.setfName(nName);
-        msgBean.setFuid(mUid);
-        msgBean.setHandler(nHandler);
-        msgBean.setMsg(nMsg);
-        msgBean.setExt(nExt);
-        msgBean.setMsgId(System.currentTimeMillis() + "");
-        msgBean.settID(nTId);*/
+    public void sendPriMsg(String uid, String fName, String msg, String ext, SendResponse sendResponse) {
 
         Client client = Client.getInstance();
-        Packet packet = new Packet();
-        packet.setData(new JSONObject(param).toString());
-        client.send(packet);
+        client.sendMsg(uid,fName,msg,ext,sendResponse,"2");
     }
 
 
@@ -386,18 +344,8 @@ public class EmaImSdk {
      */
     public void leaveLongLinkChannel(String channelId) {
 
-        HashMap<String, String> param = new HashMap<>();
-        param.put(ImConstants.APP_ID, mAppId);
-        param.put(ImConstants.FUID, mUid);
-        param.put(ImConstants.HANDLER, "97");
-        param.put(ImConstants.TID, "0");
-        param.put(ImConstants.MSG, channelId);
-        param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-
         Client client = Client.getInstance();
-        Packet packet = new Packet();
-        packet.setData(new JSONObject(param).toString());
-        client.send(packet);
+        client.leaveChannel(channelId);
     }
 
     /**
@@ -450,6 +398,8 @@ public class EmaImSdk {
         }
     }
 
+
+    //---------------------------------------------------------------------------------------------
 
     /**
      * 登录服务器
@@ -512,8 +462,6 @@ public class EmaImSdk {
         client.setInitRe(mActivity, response, param);
         client.open(mServerHost, 9999, mLongHeartDelay);
     }
-
-    //---------------------------------------------------------------------------------------------
 
     /**
      * 心跳 获取工会和世界信息
@@ -578,7 +526,13 @@ public class EmaImSdk {
             public void OnResponse(String result) {
                 try {
 
-                    handleMsgResult(result);
+                    JSONObject jsonObject = new JSONObject(result);
+                    int status = jsonObject.getInt("status");
+
+                    if(0==status){
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        handleMsgResult(data);
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -587,10 +541,7 @@ public class EmaImSdk {
         });
     }
 
-    private void handleMsgResult(String result) throws JSONException {
-
-        JSONObject jsonObject = new JSONObject(result);
-        JSONObject data = jsonObject.getJSONObject("data");
+    private void handleMsgResult(JSONObject data) throws JSONException {
 
         for (Map.Entry<String, MsgQueue> entry : mMsgQueueMap.entrySet()) {
 

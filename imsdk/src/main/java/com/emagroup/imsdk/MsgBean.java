@@ -12,7 +12,8 @@ public class MsgBean {
     private String msg;
     private String msgId;
     private String tID;
-    private String ext;
+    private String ext; //透传字段
+    private String mark; //用来在长连接传输时对应每条信息的
 
     public String getAppId() {
         return appId;
@@ -76,5 +77,13 @@ public class MsgBean {
 
     public void setExt(String ext) {
         this.ext = ext;
+    }
+
+    public String getMark() {
+        return mark;
+    }
+
+    public void setMark(String mark) {
+        this.mark = mark;
     }
 }
