@@ -323,6 +323,11 @@ public class EmaImSdk {
      */
     public void sendLongLinkMsg(String channelId, String fName, String msg, String ext, SendResponse sendResponse) {
 
+        if (!isRegist) {
+            Log.e("sendLongLinkMsg", "error : please regist first");
+            return;
+        }
+
         Client client = Client.getInstance();
         client.sendMsg(channelId,fName,msg,ext,sendResponse,"3");
     }
@@ -331,6 +336,11 @@ public class EmaImSdk {
      * 发送私人消息
      */
     public void sendPriMsg(String uid, String fName, String msg, String ext, SendResponse sendResponse) {
+
+        if (!isRegist) {
+            Log.e("sendPriMsg", "error : please regist first");
+            return;
+        }
 
         Client client = Client.getInstance();
         client.sendMsg(uid,fName,msg,ext,sendResponse,"2");

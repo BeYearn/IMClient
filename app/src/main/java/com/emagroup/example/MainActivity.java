@@ -13,6 +13,7 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.util.ToastHelper;
 
 import java.util.ArrayList;
@@ -156,6 +157,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
+            public void onJoinFail() {
+                ToastHelper.toast(MainActivity.this, "onJoinFail");
+            }
+
+            @Override
             public void onGetMsg(MsgBean msgBean) {
                 mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
@@ -166,11 +172,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onLeaveSucc(String channelId) {
                 ToastHelper.toast(MainActivity.this, "onLeaveSucc succ");
             }
+
+            @Override
+            public void onLeaveFail() {
+                ToastHelper.toast(MainActivity.this, "onLeave short Fail");
+            }
         });
     }
 
     public void sendShortMsg() {
-        EmaImSdk.getInstance().sendShortLinkMsg(etShortChannelId.getText().toString(), etSelfUid.getText().toString(), etShortMsg.getText().toString(),"ext");
+        EmaImSdk.getInstance().sendShortLinkMsg(etShortChannelId.getText().toString(), etSelfUid.getText().toString(), etShortMsg.getText().toString(), "ext", new SendResponse() {
+            @Override
+            public void onSendSucc() {
+                ToastHelper.toast(MainActivity.this, "onSendSucc");
+            }
+
+            @Override
+            public void onSendFail() {
+                ToastHelper.toast(MainActivity.this, "onSendFail");
+            }
+        });
     }
 
     public void leaveShortChannel() {
@@ -186,6 +207,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
+            public void onJoinFail() {
+                ToastHelper.toast(MainActivity.this, "onJoinFail");
+            }
+
+            @Override
             public void onGetMsg(MsgBean msgBean) {
                 mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 mMsgAdapter.notifyDataSetChanged();
@@ -196,15 +222,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onLeaveSucc(String channelId) {
                 ToastHelper.toast(MainActivity.this, "onLeaveSucc succ");
             }
+
+            @Override
+            public void onLeaveFail() {
+                ToastHelper.toast(MainActivity.this, "onLeaveFail");
+            }
         });
     }
 
     public void sendLongMsg() {
-        EmaImSdk.getInstance().sendLongLinkMsg(etLongChannelId.getText().toString(), etSelfUid.getText().toString(), etLongMsg.getText().toString(),"ext");
+        EmaImSdk.getInstance().sendLongLinkMsg(etLongChannelId.getText().toString(), etSelfUid.getText().toString(), etLongMsg.getText().toString(), "ext", new SendResponse() {
+            @Override
+            public void onSendSucc() {
+                ToastHelper.toast(MainActivity.this, "onSendSucc");
+            }
+
+            @Override
+            public void onSendFail() {
+                ToastHelper.toast(MainActivity.this, "onSendFail");
+            }
+        });
     }
 
     public void sendPriMsg() {
-        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(), etSelfUid.getText().toString(), etPriMsg.getText().toString(),"ext");
+        EmaImSdk.getInstance().sendPriMsg(etPriUid.getText().toString(), etSelfUid.getText().toString(), etPriMsg.getText().toString(), "ext", new SendResponse() {
+            @Override
+            public void onSendSucc() {
+                ToastHelper.toast(MainActivity.this, "onSendSucc");
+            }
+
+            @Override
+            public void onSendFail() {
+                ToastHelper.toast(MainActivity.this, "onSendFail");
+            }
+        });
     }
 
     public void leaveLongChannel() {

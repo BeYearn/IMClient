@@ -10,7 +10,9 @@ import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.SendResponse;
+import com.emagroup.imsdk.util.SendResQueue;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -66,16 +68,9 @@ public class Client {
     private Timer mHeartTimer;
 
     private HashMap<String, ChannelHandler> mHandlerMap;
-    //private HashMap<String, MsgQueue> mMsgQueueMap;
+
+    private final SendResQueue mSendResponseQueue;  // 用来对应发送的消息和其成功与否回调的： mark--对应操作的回调
     private int HbDelay;
-
-    private String mMarkHandler; // 用来标记当前最后一个是什么操作，以及对应的失败回调;仅加入退出频道用
-    private String mMarkChannelId; // 用来寻找对应的回调handler 来回调成功还是失败
-    private int mMarkJoL;  // 用来标记此时做的加入还是离开操作
-    private int JOIN = 11;
-    private int LEAVE = 12;
-
-    private String mMarkMsg;
 
 
     public static Client getInstance() {
@@ -89,7 +84,8 @@ public class Client {
     private Client() {
 
         mHandlerMap = new HashMap<>();
-        //mMsgQueueMap = new HashMap<>();
+
+        mSendResponseQueue = new SendResQueue();
     }
 
 
@@ -102,7 +98,6 @@ public class Client {
     public void joinChannel(String channelId, ChannelHandler handler) {
 
         mHandlerMap.put(channelId, handler);
-        //mMsgQueueMap.put(channelId, new MsgQueue());
 
         HashMap<String, String> joinParam = new HashMap<>();
         joinParam.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
@@ -111,11 +106,6 @@ public class Client {
         joinParam.put(ImConstants.TID, "0");
         joinParam.put(ImConstants.MSG, channelId);
         joinParam.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-
-        mMarkHandler = joinParam.get(ImConstants.HANDLER);
-        mMarkChannelId = channelId;
-        mMarkJoL = JOIN;
-
 
         String joinMsg = new JSONObject(joinParam).toString();
         send(new Packet(joinMsg));
@@ -126,7 +116,7 @@ public class Client {
         String currentTime = System.currentTimeMillis() + "";
         String shortTime = currentTime.substring(8, 13);
 
-        mMarkMsg = shortTime;
+        mSendResponseQueue.put(shortTime, sendResponse);
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
@@ -153,13 +143,8 @@ public class Client {
         param.put(ImConstants.MSG, channelId);
         param.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
 
-        mMarkHandler = param.get(ImConstants.HANDLER);
-        mMarkChannelId = channelId;
-        mMarkJoL = LEAVE;
-
         String leaveMsg = new JSONObject(param).toString();
         send(new Packet(leaveMsg));
-
     }
 
 
@@ -365,10 +350,12 @@ public class Client {
     private class Send implements Runnable {
         public void run() {
             Log.v(TAG, "Send :Start");
+            Packet tempData = new Packet();
             try {
                 while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != writer) {
                     Packet item;
                     while (null != (item = requestQueen.poll())) {
+                        tempData = item;
                         writer.write(item.getData());
                         writer.flush();
                         item = null;
@@ -380,14 +367,42 @@ public class Client {
                     }
                     Log.v(TAG, "Send :woken up BBBBBBBBBB");
                 }
-            } catch (SocketException e1) {
+            } catch (Exception e1) {
                 e1.printStackTrace();//发送的时候出现异常，说明socket被关闭了(服务器关闭)java.net.SocketException: sendto failed: EPIPE (Broken pipe)
-                //reconn();
-            } catch (Exception e) {
-                Log.v(TAG, "Send ::Exception");
-                e.printStackTrace();
-            }
 
+                //reconn();
+
+                try {
+                    JSONObject jsonObject = new JSONObject(tempData.getData());
+                    int handler = jsonObject.getInt("handler");
+                    switch (handler) {
+                        case 98:  //加入长频道
+                            String msgJ = jsonObject.getString("msg");
+                            ChannelHandler channelHandlerJ = mHandlerMap.get(msgJ);
+                            channelHandlerJ.onJoinFail();
+                            break;
+                        case 97:  //离开长频道
+                            String msgL = jsonObject.getString("msg");
+                            ChannelHandler channelHandlerL = mHandlerMap.get(msgL);
+                            channelHandlerL.onLeaveFail();
+                            break;
+                        case 3:  //发送场频道
+                            String mark1 = jsonObject.getString("mark");
+                            SendResponse Response1 = mSendResponseQueue.get(mark1);
+                            Response1.onSendFail();
+                            break;
+                        case 2:  //私人
+                            String mark2 = jsonObject.getString("mark");
+                            SendResponse Response2 = mSendResponseQueue.get(mark2);
+                            Response2.onSendFail();
+                            break;
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
             Log.v(TAG, "Send ::End");
         }
     }
@@ -415,6 +430,7 @@ public class Client {
                             msgBean.setMsg(strFromSocket.getString("msg"));
                             msgBean.setExt(strFromSocket.getString("ext"));
                             msgBean.setMsgId(strFromSocket.getString("msgId"));
+                            msgBean.setMark(strFromSocket.getString("mark"));
                             msgBean.settID(strFromSocket.getString("tId"));
 
 
@@ -457,6 +473,9 @@ public class Client {
                                         @Override
                                         public void run() {
                                             respListener.onGetPriMsg(msgBean);
+
+                                            SendResponse responseP = mSendResponseQueue.get(msgBean.getMark());
+                                            responseP.onSendSucc();
                                         }
                                     });
 
@@ -467,22 +486,29 @@ public class Client {
                                         public void run() {
                                             ChannelHandler channelHandlerG = mHandlerMap.get(msgBean.gettID());
                                             channelHandlerG.onGetMsg(msgBean);
+
+                                            SendResponse response = mSendResponseQueue.get(msgBean.getMark());
+                                            response.onSendSucc();
                                         }
+                                    });
+                                    break;
+                                case 5:  //长连接组队或私聊发送失败收到的信息
+
+                                    Log.e("sendFail", str);
+                                    ((Activity) context).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            SendResponse response = mSendResponseQueue.get(msgBean.getMark());
+                                            response.onSendFail();
+                                        }
+
                                     });
                                     break;
                             }
                         }
                     }
                     //reconn();//走到这一步，说明服务器socket断了
-
-                    if (msgBean.getHandler().equals(mMarkHandler)) {
-                        ChannelHandler markHandler = mHandlerMap.get(mMarkChannelId);
-                        if (mMarkJoL == JOIN) {
-                            markHandler.onJoinFail();
-                        } else if (mMarkJoL == LEAVE) {
-                            markHandler.onLeaveFail();
-                        }
-                    }
 
                     break;
                 }
