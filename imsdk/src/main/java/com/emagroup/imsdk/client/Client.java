@@ -475,7 +475,9 @@ public class Client {
                                             respListener.onGetPriMsg(msgBean);
 
                                             SendResponse responseP = mSendResponseQueue.get(msgBean.getMark());
-                                            responseP.onSendSucc();
+                                            if(null!=responseP){ //回应发送方
+                                                responseP.onSendSucc();
+                                            }
                                         }
                                     });
 
@@ -488,7 +490,9 @@ public class Client {
                                             channelHandlerG.onGetMsg(msgBean);
 
                                             SendResponse response = mSendResponseQueue.get(msgBean.getMark());
-                                            response.onSendSucc();
+                                            if(null!=response){  //回应发送方
+                                                response.onSendSucc();
+                                            }
                                         }
                                     });
                                     break;
