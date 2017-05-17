@@ -445,6 +445,8 @@ public class EmaImSdk {
                     if (0 == status) {
 
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
+                    }else {
+                        registResponse.onFailed();
                     }
 
                 } catch (Exception e) {
