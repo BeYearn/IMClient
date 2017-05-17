@@ -14,11 +14,11 @@ public class ImConstants {
     public static final String FNAME = "fName";
     public static final String CHANNEL_ID = "channelIds";
 
-    public static final String TEAM_ID = "teamId";
+    /*public static final String TEAM_ID = "teamId";
     public static final String UNION_ID = "unionId";
     public static final String WORLD_ID = "worldId";
     public static final String SYS_ID = "sysId";
-    public static final String EX_ID = "exId";
+    public static final String EX_ID = "exId";*/
 
     public static final String MSG_NUM_LIMIT = "msgLimit";
 
