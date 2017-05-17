@@ -9,7 +9,6 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by beyearn on 2017/5/16.
@@ -49,7 +48,7 @@ public class ChatLogDao {
         return rowID;
     }
 
-    public List<MsgBean> queryMsg(String selfUid, String withUid, String num) {
+    public ArrayList<MsgBean> queryMsg(String selfUid, String withUid, String num) {
         ArrayList<MsgBean> msgList = new ArrayList<>();
 
         SQLiteDatabase db = helper.getWritableDatabase();

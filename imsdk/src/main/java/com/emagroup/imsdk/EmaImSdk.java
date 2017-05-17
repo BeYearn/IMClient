@@ -11,6 +11,7 @@ import com.emagroup.imsdk.client.Packet;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.SendResponse;
+import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
 import com.emagroup.imsdk.util.MsgQueue;
@@ -20,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -191,7 +193,7 @@ public class EmaImSdk {
 
                     if (0 == status) {
                         channelHandler.onJoineSucc(strid);
-                    }else {
+                    } else {
                         channelHandler.onJoinFail();
                     }
 
@@ -237,11 +239,11 @@ public class EmaImSdk {
                     JSONObject jsonObject = new JSONObject(result);
                     int status = jsonObject.getInt("status");
 
-                    if(0==status){
+                    if (0 == status) {
                         JSONObject data = jsonObject.getJSONObject("data");
                         handleMsgResult(data);   //发送信息（同时获取聊天信息）  发的越快收的越快
                         sendResponse.onSendSucc();
-                    }else {
+                    } else {
                         sendResponse.onSendFail();
                     }
 
@@ -286,7 +288,7 @@ public class EmaImSdk {
 
                     if (0 == status) {
                         channelHandler.onLeaveSucc(strid);
-                    }else {
+                    } else {
                         channelHandler.onLeaveFail();
                     }
 
@@ -329,7 +331,7 @@ public class EmaImSdk {
         }
 
         Client client = Client.getInstance();
-        client.sendMsg(channelId,fName,msg,ext,sendResponse,"3");
+        client.sendMsg(channelId, fName, msg, ext, sendResponse, "3");
     }
 
     /**
@@ -343,7 +345,7 @@ public class EmaImSdk {
         }
 
         Client client = Client.getInstance();
-        client.sendMsg(uid,fName,msg,ext,sendResponse,"2");
+        client.sendMsg(uid, fName, msg, ext, sendResponse, "2");
     }
 
 
@@ -408,6 +410,15 @@ public class EmaImSdk {
         }
     }
 
+    /**
+     * 获取私人聊天记录
+     */
+    public ArrayList<MsgBean> queryPriMsgRecord(String selfUid, String withUid, String num) {
+        ChatLogDao chatLogDao = new ChatLogDao(mActivity);
+        ArrayList<MsgBean> msgBeenList = chatLogDao.queryMsg(selfUid, withUid, num);
+        return msgBeenList;
+    }
+
 
     //---------------------------------------------------------------------------------------------
 
@@ -445,7 +456,7 @@ public class EmaImSdk {
                     if (0 == status) {
 
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
-                    }else {
+                    } else {
                         registResponse.onFailed();
                     }
 
@@ -541,7 +552,7 @@ public class EmaImSdk {
                     JSONObject jsonObject = new JSONObject(result);
                     int status = jsonObject.getInt("status");
 
-                    if(0==status){
+                    if (0 == status) {
                         JSONObject data = jsonObject.getJSONObject("data");
                         handleMsgResult(data);
                     }

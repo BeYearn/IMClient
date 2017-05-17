@@ -1,7 +1,9 @@
 package com.emagroup.example;
 
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -49,8 +51,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText etLongMsg;
     private EditText etPriUid;
     private EditText etPriMsg;
-    private Button btIsLongLinked;
-    private Button btLongReconec;
+
+    private Button btMenu;
+    private EditText etChatLogUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +62,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         btRegist = (Button) findViewById(R.id.bt_regist);
-        btIsLongLinked = (Button) findViewById(R.id.bt_long_islinked);
-        btLongReconec = (Button) findViewById(R.id.bt_long_reconnec);
+        //btIsLongLinked = (Button) findViewById(R.id.bt_long_islinked);
+        //btLongReconec = (Button) findViewById(R.id.bt_long_reconnec);
         btClearAll = (Button) findViewById(R.id.bt_clear_all);
         btStopIm = (Button) findViewById(R.id.bt_stop_im);
 
@@ -87,10 +90,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etPriUid = (EditText) findViewById(R.id.et_pri_uid);
         etPriMsg = (EditText) findViewById(R.id.et_pri_msg);
 
+        btMenu = (Button) findViewById(R.id.bt_menu);
 
         btRegist.setOnClickListener(this);
-        btIsLongLinked.setOnClickListener(this);
-        btLongReconec.setOnClickListener(this);
+        //btIsLongLinked.setOnClickListener(this);
+        //btLongReconec.setOnClickListener(this);
         btClearAll.setOnClickListener(this);
         btStopIm.setOnClickListener(this);
         btSenfLongMsg.setOnClickListener(this);
@@ -100,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btJoinLChannel.setOnClickListener(this);
         btLeaveSChannel.setOnClickListener(this);
         btLeaveLChannel.setOnClickListener(this);
+        btMenu.setOnClickListener(this);
 
         recylerMsg = (RecyclerView) findViewById(R.id.recycler_msg);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -107,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recylerMsg.setHasFixedSize(true);  // 如果每个item高度一定  这个设置可以提高性能
         mDataList = new ArrayList<>();
         mMsgAdapter = new MsgAdapter(mDataList);
+        recylerMsg.setItemAnimator(new DefaultItemAnimator());
         recylerMsg.setAdapter(mMsgAdapter);
 
     }
@@ -141,8 +147,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetPriMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
-                mMsgAdapter.notifyDataSetChanged();
+                //mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
+                //mMsgAdapter.notifyDataSetChanged();
+                mMsgAdapter.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
         });
@@ -163,8 +170,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
-                mMsgAdapter.notifyDataSetChanged();
+                //mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
+                //mMsgAdapter.notifyDataSetChanged();
+                mMsgAdapter.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
@@ -213,8 +221,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onGetMsg(MsgBean msgBean) {
-                mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
-                mMsgAdapter.notifyDataSetChanged();
+                //mDataList.add(msgBean.getFuid() + " : " + msgBean.getMsg());
+                //mMsgAdapter.notifyDataSetChanged();
+                mMsgAdapter.add(msgBean.getFuid() + " : " + msgBean.getMsg());
                 recylerMsg.smoothScrollToPosition(mDataList.size() - 1);
             }
 
@@ -280,8 +289,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 longReconec();
                 break;
             case R.id.bt_clear_all:
-                mDataList.clear();
-                mMsgAdapter.notifyDataSetChanged();
+                mMsgAdapter.removeAll();
                 break;
             case R.id.bt_stop_im:
                 doStopPriConnect();
@@ -296,7 +304,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_leave_shortid:
                 leaveShortChannel();
                 break;
-
             case R.id.bt_join_longlink_channel:
                 joinLongChannel();
                 break;
@@ -309,6 +316,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_send_primsg:
                 sendPriMsg();
                 break;
+            case R.id.bt_menu:
+                showBottomMenu();
+                break;
+            case R.id.bt_show_chat_record:
+                showChatLog();
+                break;
         }
 
     }
@@ -320,8 +333,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void isLongLinked() {
         if (EmaImSdk.getInstance().isNeedReConnect()) {
             ToastHelper.toast(MainActivity.this, "需要");
-        }else{
+        } else {
             ToastHelper.toast(MainActivity.this, "不用");
+        }
+    }
+
+    private void showBottomMenu() {
+        BottomSheetDialog sheetDialog = new BottomSheetDialog(this);
+        sheetDialog.setContentView(R.layout.ll_bottom_sheet);
+
+        Button btIsLongLinked = (Button) sheetDialog.findViewById(R.id.bt_long_islinked);
+        Button btLongReconec = (Button) sheetDialog.findViewById(R.id.bt_long_reconnec);
+        etChatLogUid = (EditText) sheetDialog.findViewById(R.id.et_chat_record_uid);
+        Button btShowChatLog =  (Button) sheetDialog.findViewById(R.id.bt_show_chat_record);
+
+        btIsLongLinked.setOnClickListener(this);
+        btLongReconec.setOnClickListener(this);
+        btShowChatLog.setOnClickListener(this);
+
+        sheetDialog.show();
+    }
+
+    private void showChatLog() {
+        String tUid = etChatLogUid.getText().toString();
+
+        ArrayList<MsgBean> msgBeenList = EmaImSdk.getInstance().queryPriMsgRecord(etSelfUid.getText().toString(), tUid, "10");
+
+        for(MsgBean msgBean:msgBeenList){
+            mMsgAdapter.add("聊天记录： "+msgBean.getMsg());
         }
     }
 

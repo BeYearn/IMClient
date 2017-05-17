@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_chat_record_uid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:hint="uid" />
+
+        <Button
+            android:id="@+id/bt_show_chat_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="显示聊天记录" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/bt_long_islinked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ltest" />
+
+    <Button
+        android:id="@+id/bt_long_reconnec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="重连"
+        android:textSize="13sp" />
+
+</LinearLayout>

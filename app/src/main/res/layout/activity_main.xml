@@ -67,16 +67,10 @@
                 android:text="注册/登录" />
 
             <Button
-                android:id="@+id/bt_long_islinked"
+                android:id="@+id/bt_menu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ltest" />
-            <Button
-                android:id="@+id/bt_long_reconnec"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:text="重连" />
+                android:text="menu" />
 
         </LinearLayout>
 

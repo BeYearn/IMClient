@@ -10,6 +10,7 @@ import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.SendResponse;
+import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.SendResQueue;
 
 import org.json.JSONException;
@@ -481,6 +482,9 @@ public class Client {
                                         }
                                     });
 
+                                    //保存私人聊天
+                                    savePriMsg(msgBean);
+
                                     break;
                                 case 3:  //组队收到的消息
                                     ((Activity) context).runOnUiThread(new Runnable() {
@@ -525,6 +529,12 @@ public class Client {
 
             Log.v(TAG, "Receive :End");
         }
+    }
+
+    private void savePriMsg(MsgBean msgBean) {
+        ChatLogDao chatLogDao = new ChatLogDao(context);
+        chatLogDao.add(msgBean);
+
     }
 
     private void connectHeart() {

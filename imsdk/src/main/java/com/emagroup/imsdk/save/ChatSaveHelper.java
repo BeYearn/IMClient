@@ -24,7 +24,7 @@ public class ChatSaveHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        db.execSQL("CREATE TABLE" +
+        db.execSQL("CREATE TABLE " +
                 DB_NAME +
                 "(id INTEGER PRIMARY KEY, " +
                 ImConstants.APP_ID + " varchar(20), " +

@@ -21,6 +21,19 @@ public class MsgAdapter extends RecyclerView.Adapter {
         this.datas = datas;
     }
 
+
+    public void add(String string){
+        datas.add(string);
+        notifyItemInserted(datas.size()-1);
+    }
+
+    public void removeAll(){
+        datas.clear();
+        notifyDataSetChanged();
+    }
+
+
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
