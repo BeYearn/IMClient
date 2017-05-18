@@ -158,6 +158,7 @@ public class EmaImSdk {
     public void joinShortLinkChannel(String channelId, final ChannelHandler handler) {
 
         if (!isRegist) {
+            handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
             Log.e("joinShortLink", "error : please regist first");
             return;
         }
@@ -217,6 +218,11 @@ public class EmaImSdk {
      * @param msg
      */
     public void sendShortLinkMsg(String channelId, String fName, String msg, String ext, final SendResponse sendResponse) {
+        if (!isRegist) {
+            Log.e("sendShortLinkMsg", "error : please regist first");
+            sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
+            return;
+        }
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
@@ -310,6 +316,7 @@ public class EmaImSdk {
 
         if (!isRegist) {
             Log.e("joinLongLink", "error : please regist first");
+            handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
 
@@ -327,6 +334,7 @@ public class EmaImSdk {
 
         if (!isRegist) {
             Log.e("sendLongLinkMsg", "error : please regist first");
+            sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
 
@@ -340,7 +348,8 @@ public class EmaImSdk {
     public void sendPriMsg(String uid, String fName, String msg, String ext, SendResponse sendResponse) {
 
         if (!isRegist) {
-            Log.e("sendPriMsg", "error : please regist first");
+            Log.e("sendPriMsg", "error : pease regist first");
+            sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
 
