@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFailed(int code) {
-                ToastHelper.toast(MainActivity.this, "regist onFailed");
+                ToastHelper.toast(MainActivity.this, "regist onFailed"+code);
             }
 
             @Override
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onJoinFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onJoinFail");
+                ToastHelper.toast(MainActivity.this, "onJoinFail"+code);
             }
 
             @Override
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onLeaveFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onLeave short Fail");
+                ToastHelper.toast(MainActivity.this, "onLeave short Fail"+code);
             }
         });
     }
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onSendFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onSendFail");
+                ToastHelper.toast(MainActivity.this, "onSendFail"+code);
             }
         });
     }
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onJoinFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onJoinFail");
+                ToastHelper.toast(MainActivity.this, "onJoinFail"+code);
             }
 
             @Override
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onLeaveFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onLeaveFail");
+                ToastHelper.toast(MainActivity.this, "onLeaveFail"+code);
             }
         });
     }
@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onSendFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onSendFail");
+                ToastHelper.toast(MainActivity.this, "onSendFail"+code);
             }
         });
     }
@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onSendFail(int code) {
-                ToastHelper.toast(MainActivity.this, "onSendFail");
+                ToastHelper.toast(MainActivity.this, "onSendFail"+code);
             }
         });
     }

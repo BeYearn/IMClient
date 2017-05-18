@@ -423,6 +423,8 @@ public class Client {
                     while ((str = reader.readLine()) != null) {    //误以为readLine()是读取到没有数据时就返回null(因为其它read方法当读到没有数据时返回-1)，而实际上readLine()是一个阻塞函数，当没有数据读取时，就一直会阻塞在那，而不是返回null；readLine()只有在数据流发生异常或者另一端被close()掉时，才会返回null值。
                         if (null != respListener) {
 
+                            Log.e("socket_receive", str);
+
                             JSONObject strFromSocket = new JSONObject(str);
 
                             msgBean.setAppId(strFromSocket.getString("appId"));
@@ -466,7 +468,7 @@ public class Client {
                                     break;
 
                                 case 1:  // 心跳的回应
-                                    Log.e("socketHeartRe", str);
+                                    //Log.e("socketHeartRe", str);
                                     break;
 
                                 case 2:  //1-1收到的消息
@@ -503,7 +505,6 @@ public class Client {
                                     break;
                                 case 5:  //长连接组队(没加入队伍)或私聊（不在线）发送失败收到的信息
 
-                                    Log.e("sendFail", str);
                                     ((Activity) context).runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
