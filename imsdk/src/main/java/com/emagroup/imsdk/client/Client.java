@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import com.emagroup.imsdk.ErrorCode;
 import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
@@ -380,22 +381,22 @@ public class Client {
                         case 98:  //加入长频道
                             String msgJ = jsonObject.getString("msg");
                             ChannelHandler channelHandlerJ = mHandlerMap.get(msgJ);
-                            channelHandlerJ.onJoinFail();
+                            channelHandlerJ.onJoinFail(ErrorCode.CODE_SOCKET_BROKEN);
                             break;
                         case 97:  //离开长频道
                             String msgL = jsonObject.getString("msg");
                             ChannelHandler channelHandlerL = mHandlerMap.get(msgL);
-                            channelHandlerL.onLeaveFail();
+                            channelHandlerL.onLeaveFail(ErrorCode.CODE_SOCKET_BROKEN);
                             break;
                         case 3:  //发送场频道
                             String mark1 = jsonObject.getString("mark");
                             SendResponse Response1 = mSendResponseQueue.get(mark1);
-                            Response1.onSendFail();
+                            Response1.onSendFail(ErrorCode.CODE_SOCKET_BROKEN);
                             break;
                         case 2:  //私人
                             String mark2 = jsonObject.getString("mark");
                             SendResponse Response2 = mSendResponseQueue.get(mark2);
-                            Response2.onSendFail();
+                            Response2.onSendFail(ErrorCode.CODE_SOCKET_BROKEN);
                             break;
                     }
 
@@ -500,7 +501,7 @@ public class Client {
                                         }
                                     });
                                     break;
-                                case 5:  //长连接组队或私聊发送失败收到的信息
+                                case 5:  //长连接组队(没加入队伍)或私聊（不在线）发送失败收到的信息
 
                                     Log.e("sendFail", str);
                                     ((Activity) context).runOnUiThread(new Runnable() {
@@ -508,7 +509,12 @@ public class Client {
                                         public void run() {
 
                                             SendResponse response = mSendResponseQueue.get(msgBean.getMark());
-                                            response.onSendFail();
+                                            String msg = msgBean.getMsg();
+                                            if (msg.equals("70001")){
+                                                response.onSendFail(ErrorCode.CODE_USER_OFFLINE);
+                                            }else if (msg.equals("70002")){
+                                                response.onSendFail(ErrorCode.CODE_NOT_IN_CHANNEL);
+                                            }
                                         }
 
                                     });

@@ -123,7 +123,7 @@ public class EmaImSdk {
         String url = params.get(ImConstants.SERVER_URL);
 
         if (mAppId == null || mAppKey == null || mUid == null || url == null) {
-            response.onFailed();
+            response.onFailed(ErrorCode.CODE_PARAMS_INCOMPLETE);
             Log.e("imregist", "parameters error");
             return;
         } else {
@@ -140,7 +140,7 @@ public class EmaImSdk {
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("imregist", "heartbeat delay time error");
-            response.onFailed();
+            response.onFailed(ErrorCode.CODE_PARAMS_ERROR);
             return;
         }
         //短链接（短链心跳也开始 不行，因为这时候还没消息回调handler） 里面进一步长连接
@@ -194,7 +194,7 @@ public class EmaImSdk {
                     if (0 == status) {
                         channelHandler.onJoineSucc(strid);
                     } else {
-                        channelHandler.onJoinFail();
+                        channelHandler.onJoinFail(ErrorCode.CODE_NET_ERROR);
                     }
 
                     if (mFirstJoin) {
@@ -244,7 +244,7 @@ public class EmaImSdk {
                         handleMsgResult(data);   //发送信息（同时获取聊天信息）  发的越快收的越快
                         sendResponse.onSendSucc();
                     } else {
-                        sendResponse.onSendFail();
+                        sendResponse.onSendFail(ErrorCode.CODE_NET_ERROR);
                     }
 
 
@@ -289,7 +289,7 @@ public class EmaImSdk {
                     if (0 == status) {
                         channelHandler.onLeaveSucc(strid);
                     } else {
-                        channelHandler.onLeaveFail();
+                        channelHandler.onLeaveFail(ErrorCode.CODE_NET_ERROR);
                     }
 
                 } catch (Exception e) {
@@ -457,7 +457,7 @@ public class EmaImSdk {
 
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
                     } else {
-                        registResponse.onFailed();
+                        registResponse.onFailed(ErrorCode.CODE_NET_ERROR);
                     }
 
                 } catch (Exception e) {

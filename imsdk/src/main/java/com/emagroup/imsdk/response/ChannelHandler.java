@@ -10,11 +10,11 @@ public interface ChannelHandler {
 
     void onJoineSucc(String channelId);
 
-    void onJoinFail();
+    void onJoinFail(int errorCode);
 
     void onGetMsg(MsgBean msgBean);
 
     void onLeaveSucc(String channelId);
 
-    void onLeaveFail();
+    void onLeaveFail(int errorCode);
 }

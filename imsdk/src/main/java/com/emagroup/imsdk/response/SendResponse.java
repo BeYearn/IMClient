@@ -8,6 +8,6 @@ public interface SendResponse {
 
     void onSendSucc();
 
-    void onSendFail();
+    void onSendFail(int errorCode);
 
 }

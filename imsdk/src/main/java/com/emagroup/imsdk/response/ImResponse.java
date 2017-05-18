@@ -9,7 +9,7 @@ import com.emagroup.imsdk.MsgBean;
 public interface ImResponse {
     void onSuccessed();
 
-    void onFailed();
+    void onFailed(int errorCode);
 
     void onStoped();
 
