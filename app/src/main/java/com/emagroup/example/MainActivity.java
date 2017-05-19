@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,7 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.LCStateListener;
 import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.util.ToastHelper;
 
@@ -115,6 +117,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recylerMsg.setItemAnimator(new DefaultItemAnimator());
         recylerMsg.setAdapter(mMsgAdapter);
 
+
+        EmaImSdk.getInstance().setLCStateListener(new LCStateListener() {
+            @Override
+            public void onState(int stateCode) {
+                Log.e("LCState!!!!!","code"+stateCode);
+            }
+        });
     }
 
 

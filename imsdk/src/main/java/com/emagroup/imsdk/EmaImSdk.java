@@ -10,6 +10,7 @@ import com.emagroup.imsdk.client.Client;
 import com.emagroup.imsdk.client.Packet;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.LCStateListener;
 import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.ConfigUtils;
@@ -375,6 +376,15 @@ public class EmaImSdk {
     public boolean isNeedReConnect() {
         Client client = Client.getInstance();
         return client.isNeedConn();
+    }
+
+    /**
+     * 长连接状态的回调
+     * @param stateListener
+     */
+    public void setLCStateListener(LCStateListener stateListener){
+        Client client = Client.getInstance();
+        client.setStateListener(stateListener);
     }
 
     /**

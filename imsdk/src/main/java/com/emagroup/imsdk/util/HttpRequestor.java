@@ -124,7 +124,10 @@ public class HttpRequestor {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
             }
+
+            setOnResponse(listener,"{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
         }
+
         String result = resultBuffer.toString();
         setOnResponse(listener, result);
     }
@@ -219,7 +222,10 @@ public class HttpRequestor {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
             }
+
+            setOnResponse(listener,"{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
         }
+
         String result = resultBuffer.toString();
         setOnResponse(listener, result);
     }

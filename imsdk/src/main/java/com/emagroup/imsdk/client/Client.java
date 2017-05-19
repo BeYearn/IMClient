@@ -10,6 +10,7 @@ import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
+import com.emagroup.imsdk.response.LCStateListener;
 import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.SendResQueue;
@@ -74,6 +75,12 @@ public class Client {
     private final SendResQueue mSendResponseQueue;  // 用来对应发送的消息和其成功与否回调的： mark--对应操作的回调
     private int HbDelay;
     private String mUid;  //当前用户id
+    private LCStateListener mStateListener = new LCStateListener() {  //当前长连接状态
+        @Override
+        public void onState(int stateCode) {
+
+        }
+    };
 
 
     public static Client getInstance() {
@@ -98,6 +105,10 @@ public class Client {
         this.mInitInfo = param;
 
         this.mUid = mInitInfo.get(ImConstants.FUID);
+    }
+
+    public void setStateListener(LCStateListener stateListener) {
+        this.mStateListener = stateListener;
     }
 
     public void joinChannel(String channelId, ChannelHandler handler) {
@@ -378,6 +389,8 @@ public class Client {
 
                 //reconn();
 
+                mStateListener.onState(ErrorCode.CODE_SOCKET_BROKEN);
+
                 try {
                     JSONObject jsonObject = new JSONObject(tempData.getData());
                     int handler = jsonObject.getInt("handler");
@@ -528,6 +541,8 @@ public class Client {
                         }
                     }
                     //reconn();//走到这一步，说明服务器socket断了
+
+                    mStateListener.onState(ErrorCode.CODE_SOCKET_BROKEN);
 
                     break;
                 }
