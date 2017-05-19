@@ -31,11 +31,11 @@ public class ChatSaveHelper extends SQLiteOpenHelper {
                 ImConstants.FNAME + " varchar(20), " +
                 ImConstants.FUID + " varchar(32), " +
                 ImConstants.HANDLER + " varchar(5), " +
-                ImConstants.MSG + " varchar(100), " +
+                ImConstants.MSG + " varchar(400), " +
                 ImConstants.MSG_ID + " varchar(20), " +
                 ImConstants.TID + " varchar(40), " +
-                ImConstants.EXT + " varchar(100), " +
-                ImConstants.MARK + " varchar(6));");
+                ImConstants.EXT + " varchar(400), " +
+                ImConstants.MARK + " varchar(40));");
     }
 
     @Override

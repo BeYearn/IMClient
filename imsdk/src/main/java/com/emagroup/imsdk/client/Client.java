@@ -73,6 +73,7 @@ public class Client {
 
     private final SendResQueue mSendResponseQueue;  // 用来对应发送的消息和其成功与否回调的： mark--对应操作的回调
     private int HbDelay;
+    private String mUid;  //当前用户id
 
 
     public static Client getInstance() {
@@ -95,6 +96,8 @@ public class Client {
         this.context = mContext;
         this.respListener = response;
         this.mInitInfo = param;
+
+        this.mUid = mInitInfo.get(ImConstants.FUID);
     }
 
     public void joinChannel(String channelId, ChannelHandler handler) {
@@ -210,7 +213,7 @@ public class Client {
         lastConnTime = System.currentTimeMillis();
 
         close();
-        state = STATE_OPEN;
+        state = STATE_OPEN;                                                                        //1
         conn = new Thread(new Conn());
         conn.start();
     }
@@ -301,13 +304,13 @@ public class Client {
             try {
                 while (state != STATE_CLOSE) {
                     try {
-                        state = STATE_CONNECT_START;
+                        state = STATE_CONNECT_START;                                                //2
                         socket = new Socket();
                         socket.connect(new InetSocketAddress(IP, PORT), 10 * 1000);
-                        state = STATE_CONNECT_SUCCESS;
+                        state = STATE_CONNECT_SUCCESS;                                              //3    正式连接成功
                     } catch (Exception e) {
                         e.printStackTrace();
-                        state = STATE_CONNECT_FAILED;
+                        state = STATE_CONNECT_FAILED;                                               //3'
                     }
 
                     if (state == STATE_CONNECT_SUCCESS) {
@@ -326,9 +329,10 @@ public class Client {
                         send.start();
                         rec.start();
                         break;
+
                     } else {
-                        state = STATE_CONNECT_WAIT;
-                        //如果有网络没有连接上，则定时去连接，没有网络则直接退出
+                        state = STATE_CONNECT_WAIT;                                                 //4
+                        //如果有网络没有连接上，则定时去连接（还处于while中），没有网络则直接退出
                         if (NetworkUtil.isNetworkAvailable(context)) {
                             try {
                                 Thread.sleep(15 * 1000);
@@ -479,7 +483,7 @@ public class Client {
                                             respListener.onGetPriMsg(msgBean);
 
                                             SendResponse responseP = mSendResponseQueue.get(msgBean.getMark());
-                                            if(null!=responseP){ //回应发送方
+                                            if (null != responseP && msgBean.getFuid().equals(mUid)) { //回应发送方
                                                 responseP.onSendSucc();
                                             }
                                         }
@@ -497,7 +501,7 @@ public class Client {
                                             channelHandlerG.onGetMsg(msgBean);
 
                                             SendResponse response = mSendResponseQueue.get(msgBean.getMark());
-                                            if(null!=response){  //回应发送方
+                                            if (null != response && msgBean.getFuid().equals(mUid)) {  //回应发送方
                                                 response.onSendSucc();
                                             }
                                         }
@@ -511,9 +515,9 @@ public class Client {
 
                                             SendResponse response = mSendResponseQueue.get(msgBean.getMark());
                                             String msg = msgBean.getMsg();
-                                            if (msg.equals("70001")){
+                                            if (msg.equals("70001")) {
                                                 response.onSendFail(ErrorCode.CODE_USER_OFFLINE);
-                                            }else if (msg.equals("70002")){
+                                            } else if (msg.equals("70002")) {
                                                 response.onSendFail(ErrorCode.CODE_NOT_IN_CHANNEL);
                                             }
                                         }
