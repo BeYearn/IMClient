@@ -380,9 +380,10 @@ public class EmaImSdk {
 
     /**
      * 长连接状态的回调
+     *
      * @param stateListener
      */
-    public void setLCStateListener(LCStateListener stateListener){
+    public void setLCStateListener(LCStateListener stateListener) {
         Client client = Client.getInstance();
         client.setStateListener(stateListener);
     }
@@ -473,13 +474,13 @@ public class EmaImSdk {
                     mServerHost = data.getString("host");
 
                     if (0 == status) {
-
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
                     } else {
                         registResponse.onFailed(ErrorCode.CODE_NET_ERROR);
                     }
 
                 } catch (Exception e) {
+                    registResponse.onFailed(ErrorCode.CODE_NET_ERROR);
                     e.printStackTrace();
                 }
             }

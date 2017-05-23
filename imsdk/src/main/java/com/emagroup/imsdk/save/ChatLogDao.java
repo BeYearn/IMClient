@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 /**
  * Created by beyearn on 2017/5/16.
- *
  */
 
 public class ChatLogDao {
@@ -55,11 +54,11 @@ public class ChatLogDao {
 
         Cursor cursor = db.query(ChatSaveHelper.DB_NAME,    //table name
                 null,                                        //columns
-                "fUid=? and tId=?",                          //selection
-                new String[]{selfUid, withUid},               //selectionArgs
+                "fUid=? and tId=? or fUid=? and tId=?",                          //selection
+                new String[]{selfUid, withUid, withUid, selfUid},               //selectionArgs
                 null,                                        //groupBy
                 null,                                         //having
-                "msgId",                                     //orderBy
+                "msgId DESC",                                 //orderBy          ASC：表示递增排列 DESC：表示递减排列
                 num                                           //limit
         );
 
