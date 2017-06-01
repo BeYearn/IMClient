@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.emagroup.imsdk.client.Client;
 import com.emagroup.imsdk.client.Packet;
@@ -15,6 +14,7 @@ import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
+import com.emagroup.imsdk.util.L;
 import com.emagroup.imsdk.util.MsgQueue;
 import com.emagroup.imsdk.util.ThreadUtil;
 
@@ -125,7 +125,7 @@ public class EmaImSdk {
 
         if (mAppId == null || mAppKey == null || mUid == null || url == null) {
             response.onFailed(ErrorCode.CODE_PARAMS_INCOMPLETE);
-            Log.e("imregist", "parameters error");
+            L.e("imregist", "parameters error");
             return;
         } else {
             ImUrl.setServerUrl(url);
@@ -140,7 +140,7 @@ public class EmaImSdk {
             mLongHeartDelay = Integer.parseInt(longDelay == null ? "20" : longDelay);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("imregist", "heartbeat delay time error");
+            L.e("imregist", "heartbeat delay time error");
             response.onFailed(ErrorCode.CODE_PARAMS_ERROR);
             return;
         }
@@ -160,7 +160,7 @@ public class EmaImSdk {
 
         if (!isRegist) {
             handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
-            Log.e("joinShortLink", "error : please regist first");
+            L.e("joinShortLink", "error : please regist first");
             return;
         }
 
@@ -220,7 +220,7 @@ public class EmaImSdk {
      */
     public void sendShortLinkMsg(String channelId, String fName, String msg, String ext, final SendResponse sendResponse) {
         if (!isRegist) {
-            Log.e("sendShortLinkMsg", "error : please regist first");
+            L.e("sendShortLinkMsg", "error : please regist first");
             sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
@@ -316,7 +316,7 @@ public class EmaImSdk {
     public void joinLongLinkChannel(String channelId, ChannelHandler handler) {
 
         if (!isRegist) {
-            Log.e("joinLongLink", "error : please regist first");
+            L.e("joinLongLink", "error : please regist first");
             handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
@@ -334,7 +334,7 @@ public class EmaImSdk {
     public void sendLongLinkMsg(String channelId, String fName, String msg, String ext, SendResponse sendResponse) {
 
         if (!isRegist) {
-            Log.e("sendLongLinkMsg", "error : please regist first");
+            L.e("sendLongLinkMsg", "error : please regist first");
             sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
@@ -349,7 +349,7 @@ public class EmaImSdk {
     public void sendPriMsg(String uid, String fName, String msg, String ext, SendResponse sendResponse) {
 
         if (!isRegist) {
-            Log.e("sendPriMsg", "error : pease regist first");
+            L.e("sendPriMsg", "error : pease regist first");
             sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
@@ -439,6 +439,12 @@ public class EmaImSdk {
         return msgBeenList;
     }
 
+    /**
+     * 设置log的关闭打开
+     */
+    public void setDebugable(boolean isDebug) {
+        L.isDebug = isDebug;
+    }
 
     //---------------------------------------------------------------------------------------------
 
@@ -538,7 +544,7 @@ public class EmaImSdk {
             public void run() {
                 long msgdelay = (long) ((mShortHeartDelay / 10.0) * 1000);
 
-                //Log.e("pumpMsg", msgdelay + "");
+                //L.e("pumpMsg", msgdelay + "");
 
                 MsgBean msgBean = msgQueue.deQueue();
                 while (null != msgBean) {

@@ -3,8 +3,6 @@ package com.emagroup.imsdk.client;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
-
 import com.emagroup.imsdk.ErrorCode;
 import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
@@ -13,6 +11,7 @@ import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.LCStateListener;
 import com.emagroup.imsdk.response.SendResponse;
 import com.emagroup.imsdk.save.ChatLogDao;
+import com.emagroup.imsdk.util.L;
 import com.emagroup.imsdk.util.SendResQueue;
 
 import org.json.JSONException;
@@ -86,7 +85,7 @@ public class Client {
     public static Client getInstance() {
         if (mInstance == null) {
             mInstance = new Client();
-            Log.e("newSocketRunable", mInstance.toString());
+            L.e("newSocketRunable", mInstance.toString());
         }
         return mInstance;
     }
@@ -311,7 +310,7 @@ public class Client {
 
     private class Conn implements Runnable {
         public void run() {
-            Log.v(TAG, "Conn :Start");
+            L.v(TAG, "Conn :Start");
             try {
                 while (state != STATE_CLOSE) {
                     try {
@@ -360,13 +359,13 @@ public class Client {
                 e.printStackTrace();
             }
 
-            Log.v(TAG, "Conn :End");
+            L.v(TAG, "Conn :End");
         }
     }
 
     private class Send implements Runnable {
         public void run() {
-            Log.v(TAG, "Send :Start");
+            L.v(TAG, "Send :Start");
             Packet tempData = new Packet();
             try {
                 while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != writer) {
@@ -378,11 +377,11 @@ public class Client {
                         item = null;
                     }
 
-                    Log.v(TAG, "Send :woken up AAAAAAAAA");
+                    L.v(TAG, "Send :woken up AAAAAAAAA");
                     synchronized (lock) {
                         lock.wait();
                     }
-                    Log.v(TAG, "Send :woken up BBBBBBBBBB");
+                    L.v(TAG, "Send :woken up BBBBBBBBBB");
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();//发送的时候出现异常，说明socket被关闭了(服务器关闭)java.net.SocketException: sendto failed: EPIPE (Broken pipe)
@@ -422,17 +421,17 @@ public class Client {
                 }
 
             }
-            Log.v(TAG, "Send ::End");
+            L.v(TAG, "Send ::End");
         }
     }
 
     private class Receive implements Runnable {
         public void run() {
-            Log.v(TAG, "Receive :Start");
+            L.v(TAG, "Receive :Start");
 
             try {
                 while (state != STATE_CLOSE && state == STATE_CONNECT_SUCCESS && null != reader) {
-                    Log.v(TAG, "Receive :---------");
+                    L.v(TAG, "Receive :---------");
 
                     String str = null;
                     final MsgBean msgBean = new MsgBean();
@@ -440,7 +439,7 @@ public class Client {
                     while ((str = reader.readLine()) != null) {    //误以为readLine()是读取到没有数据时就返回null(因为其它read方法当读到没有数据时返回-1)，而实际上readLine()是一个阻塞函数，当没有数据读取时，就一直会阻塞在那，而不是返回null；readLine()只有在数据流发生异常或者另一端被close()掉时，才会返回null值。
                         if (null != respListener) {
 
-                            Log.e("socket_receive", str);
+                            L.e("socket_receive", str);
 
                             JSONObject strFromSocket = new JSONObject(str);
 
@@ -485,7 +484,7 @@ public class Client {
                                     break;
 
                                 case 1:  // 心跳的回应
-                                    //Log.e("socketHeartRe", str);
+                                    //L.e("socketHeartRe", str);
                                     break;
 
                                 case 2:  //1-1收到的消息
@@ -549,11 +548,11 @@ public class Client {
             } catch (SocketException e1) {
                 e1.printStackTrace();//客户端主动socket.close()会调用这里 java.net.SocketException: Socket closed
             } catch (Exception e2) {
-                Log.v(TAG, "Receive :Exception");
+                L.v(TAG, "Receive :Exception");
                 e2.printStackTrace();
             }
 
-            Log.v(TAG, "Receive :End");
+            L.v(TAG, "Receive :End");
         }
     }
 
@@ -579,7 +578,7 @@ public class Client {
                 try {
                     String heartMsg = new JSONObject(heartParam).toString();
                     send(new Packet(heartMsg));
-                    Log.e("socketHeartContent", heartMsg);
+                    L.e("socketHeartContent", heartMsg);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

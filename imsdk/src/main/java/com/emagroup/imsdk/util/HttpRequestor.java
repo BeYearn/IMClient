@@ -4,8 +4,6 @@ package com.emagroup.imsdk.util;
  * Created by Administrator on 2016/7/29.
  */
 
-import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +27,6 @@ public class HttpRequestor {
     private Integer socketTimeout = null;
     private String proxyHost = null;
     private Integer proxyPort = null;
-    private boolean isDebug = true;
-
 
     public void doPostAsync(String url, Map<String, String> params, OnResponsetListener listener) {
 
@@ -84,7 +80,7 @@ public class HttpRequestor {
         StringBuffer resultSb = new StringBuffer();
         // 拼凑get请求的URL字串，使用URLEncoder.encode对特殊和不可见字符进行编码
         url = buildUrl(url, params);
-        Log.e(TAG, "url_:" + url);
+        L.e(TAG, "url_:" + url);
         URL localURL = new URL(url);
 
         URLConnection connection = openConnection(localURL);
@@ -111,6 +107,9 @@ public class HttpRequestor {
             while ((tempLine = reader.readLine()) != null) {
                 resultBuffer.append(tempLine);
             }
+        } catch (Exception e) {
+            setOnResponse(listener, "{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
+            e.printStackTrace();
         } finally {
             if (reader != null) {
                 reader.close();
@@ -124,8 +123,6 @@ public class HttpRequestor {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
             }
-
-            setOnResponse(listener,"{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
         }
 
         String result = resultBuffer.toString();
@@ -162,9 +159,7 @@ public class HttpRequestor {
             }
         }
 
-        if(isDebug){
-            Log.e("postUrl", url + "?" + parameterBuffer.toString());
-        }
+        L.e("postUrl", url + "?" + parameterBuffer.toString());
 
         URL localURL = new URL(url);
 
@@ -203,6 +198,9 @@ public class HttpRequestor {
             while ((tempLine = reader.readLine()) != null) {
                 resultBuffer.append(tempLine);
             }
+        } catch (Exception e) {
+            setOnResponse(listener, "{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
+            e.printStackTrace();
         } finally {
             if (outputStreamWriter != null) {
                 outputStreamWriter.close();
@@ -222,8 +220,6 @@ public class HttpRequestor {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
             }
-
-            setOnResponse(listener,"{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
         }
 
         String result = resultBuffer.toString();
@@ -264,12 +260,10 @@ public class HttpRequestor {
 
     private void setOnResponse(OnResponsetListener listener, String result) {
         if (listener != null) {
-            if (isDebug) {
-                Log.e("httpResponse", result);
-            }
+            L.e("httpResponse", result);
             listener.OnResponse(result);
         } else {
-            Log.e(TAG, "OnResponsetListener is null");
+            L.e(TAG, "OnResponsetListener is null");
         }
     }
 

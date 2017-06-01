@@ -124,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e("LCState!!!!!","code"+stateCode);
             }
         });
+
+        EmaImSdk.getInstance().setDebugable(false);
     }
 
 

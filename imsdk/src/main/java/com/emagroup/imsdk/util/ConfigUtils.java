@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import java.security.MessageDigest;
 
@@ -74,7 +73,7 @@ public class ConfigUtils {
             Bundle bundle = ai.metaData;
             value = bundle.getString(key);
         } catch (Exception e) {
-            Log.e(TAG, "参数设置错误, 请检查！");
+            L.e(TAG, "参数设置错误, 请检查！");
             e.printStackTrace();
         }
         if (null == value) {
