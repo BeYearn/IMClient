@@ -527,11 +527,7 @@ public class Client {
 
                                             SendResponse response = mSendResponseQueue.get(msgBean.getMark());
                                             String msg = msgBean.getMsg();
-                                            if (msg.equals("70001")) {
-                                                response.onSendFail(ErrorCode.CODE_USER_OFFLINE);
-                                            } else if (msg.equals("70002")) {
-                                                response.onSendFail(ErrorCode.CODE_NOT_IN_CHANNEL);
-                                            }
+                                            response.onSendFail(Integer.parseInt(msg));
                                         }
 
                                     });

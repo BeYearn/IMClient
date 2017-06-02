@@ -14,8 +14,6 @@ public class ErrorCode {
 
     public static final int CODE_NET_ERROR = 2001;           //网络错误
     public static final int CODE_SOCKET_BROKEN = 2002;        // 长连接断开
-    public static final int CODE_USER_OFFLINE = 2003;         // 用户不在线
-    public static final int CODE_NOT_IN_CHANNEL = 2004;       //不在该频道中
 
     public static final int CODE_JSON_ERROR = 3001;       // json解析错误
 }
