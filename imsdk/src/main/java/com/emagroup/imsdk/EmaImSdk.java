@@ -184,19 +184,16 @@ public class EmaImSdk {
                 try {
 
                     JSONObject jsonObject = new JSONObject(result);
-
                     int status = jsonObject.getInt("status");
 
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    JSONArray channelIdArr = data.getJSONArray("channelId");
-                    String strid = (String) channelIdArr.get(0);  //现在加入离开都只是一个个的，所以取去第一个好了
-
-                    ChannelHandler channelHandler = mHandlerMap.get(strid);
-
                     if (0 == status) {
-                        channelHandler.onJoineSucc(strid);
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        JSONArray channelIdArr = data.getJSONArray("channelId");
+                        String strid = (String) channelIdArr.get(0);  //现在加入离开都只是一个个的，所以取去第一个好了
+
+                        handler.onJoineSucc(strid);
                     } else {
-                        channelHandler.onJoinFail(ErrorCode.CODE_NET_ERROR);
+                        handler.onJoinFail(ErrorCode.CODE_NET_ERROR);
                     }
 
                     if (mFirstJoin) {
@@ -206,6 +203,7 @@ public class EmaImSdk {
                     }
 
                 } catch (Exception e) {
+                    handler.onJoinFail(ErrorCode.CODE_JSON_ERROR);
                     e.printStackTrace();
                 }
             }
@@ -267,7 +265,10 @@ public class EmaImSdk {
      *
      * @param channelId
      */
-    public void leaveShortLinkChannel(String channelId) {
+    public void leaveShortLinkChannel(final String channelId) {
+
+        final ChannelHandler channelHandler = mHandlerMap.get(channelId);
+
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);
         param.put(ImConstants.UID, mUid);
@@ -284,22 +285,16 @@ public class EmaImSdk {
                 try {
 
                     JSONObject jsonObject = new JSONObject(result);
-
                     int status = jsonObject.getInt("status");
 
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    JSONArray channelIdArr = data.getJSONArray("channelId");
-                    String strid = (String) channelIdArr.get(0);  //现在加入离开都只是一个个的，所以取去第一个好了
-
-                    ChannelHandler channelHandler = mHandlerMap.get(strid);
-
                     if (0 == status) {
-                        channelHandler.onLeaveSucc(strid);
+                        channelHandler.onLeaveSucc(channelId);
                     } else {
                         channelHandler.onLeaveFail(ErrorCode.CODE_NET_ERROR);
                     }
 
                 } catch (Exception e) {
+                    channelHandler.onLeaveFail(ErrorCode.CODE_JSON_ERROR);
                     e.printStackTrace();
                 }
             }
@@ -476,17 +471,17 @@ public class EmaImSdk {
 
                     JSONObject jsonObject = new JSONObject(result);
                     int status = jsonObject.getInt("status");
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    mServerHost = data.getString("host");
 
                     if (0 == status) {
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        mServerHost = data.getString("host");
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
                     } else {
                         registResponse.onFailed(ErrorCode.CODE_NET_ERROR);
                     }
 
                 } catch (Exception e) {
-                    registResponse.onFailed(ErrorCode.CODE_NET_ERROR);
+                    registResponse.onFailed(ErrorCode.CODE_JSON_ERROR);
                     e.printStackTrace();
                 }
             }

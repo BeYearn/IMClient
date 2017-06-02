@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        EmaImSdk.getInstance().setDebugable(false);
+        //EmaImSdk.getInstance().setDebugable(false);
     }
 
 
