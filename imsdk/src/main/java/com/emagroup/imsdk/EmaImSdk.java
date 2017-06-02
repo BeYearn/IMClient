@@ -193,7 +193,7 @@ public class EmaImSdk {
 
                         handler.onJoineSucc(strid);
                     } else {
-                        handler.onJoinFail(ErrorCode.CODE_NET_ERROR);
+                        handler.onJoinFail(jsonObject.getInt("message"));
                     }
 
                     if (mFirstJoin) {
@@ -249,7 +249,7 @@ public class EmaImSdk {
                         handleMsgResult(data);   //发送信息（同时获取聊天信息）  发的越快收的越快
                         sendResponse.onSendSucc();
                     } else {
-                        sendResponse.onSendFail(ErrorCode.CODE_NET_ERROR);
+                        sendResponse.onSendFail(jsonObject.getInt("message"));
                     }
 
 
@@ -290,7 +290,7 @@ public class EmaImSdk {
                     if (0 == status) {
                         channelHandler.onLeaveSucc(channelId);
                     } else {
-                        channelHandler.onLeaveFail(ErrorCode.CODE_NET_ERROR);
+                        channelHandler.onLeaveFail(jsonObject.getInt("message"));
                     }
 
                 } catch (Exception e) {
@@ -477,7 +477,7 @@ public class EmaImSdk {
                         mServerHost = data.getString("host");
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
                     } else {
-                        registResponse.onFailed(ErrorCode.CODE_NET_ERROR);
+                        registResponse.onFailed(jsonObject.getInt("message"));
                     }
 
                 } catch (Exception e) {
