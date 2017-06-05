@@ -135,10 +135,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         registParams.put(ImConstants.APP_KEY, "a5fdfc18c72f4fc9602746ddec9f3b21");
         registParams.put(ImConstants.UID, etSelfUid.getText().toString());
         registParams.put(ImConstants.MSG_NUM_LIMIT, etMsgLimit.getText().toString()); // 该字段不传默认为10
-        registParams.put(ImConstants.SERVER_URL, "http://118.178.230.138:8080/");  //注意格式
+        registParams.put(ImConstants.SERVER_URL, "http://123.207.251.62:8080/");  //注意格式
 
         registParams.put(ImConstants.SHORT_HEARTBEAT_DELAY, "10");
-        registParams.put(ImConstants.LONG_HEARTBEAT_DELAY, "20");
+        registParams.put(ImConstants.LONG_HEARTBEAT_DELAY, "10");
         EmaImSdk.getInstance().regist(this, registParams, new ImResponse() {
 
             @Override

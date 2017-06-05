@@ -373,6 +373,7 @@ public class Client {
                     while (null != (item = requestQueen.poll())) {
                         tempData = item;
                         writer.write(item.getData());
+                        writer.newLine();
                         writer.flush();
                         item = null;
                     }
