@@ -417,6 +417,7 @@ public class EmaImSdk {
         client.close();
 
         //短链心跳的停止
+        mFirstJoin = true;  //心跳条件重置
         if (mHeartTimer != null) {
             mHeartTimer.cancel();
         }
