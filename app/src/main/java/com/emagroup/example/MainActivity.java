@@ -6,18 +6,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.emagroup.imsdk.EmaImSdk;
 import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
+import com.emagroup.imsdk.SensBean;
 import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.LCStateListener;
 import com.emagroup.imsdk.response.SendResponse;
+import com.emagroup.imsdk.response.SensListener;
 import com.emagroup.imsdk.util.ToastHelper;
 
 import java.util.ArrayList;
@@ -56,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btMenu;
     private EditText etChatLogUid;
+    private EditText etSenStr;
+    private TextView tvSensResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -333,8 +340,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.bt_show_chat_record:
                 showChatLog();
                 break;
+            case R.id.bt_is_sensitive:
+                isSensitive();
+                break;
         }
 
+    }
+
+    private void isSensitive() {
+        EmaImSdk.getInstance().isSensitiveStr(etSenStr.getText().toString(), new SensListener() {
+            @Override
+            public void querySucc(final SensBean sensBean) {
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvSensResult.setText(sensBean.getResultStr());
+                    }
+                });
+            }
+
+            @Override
+            public void queryFail() {
+
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvSensResult.setText("查询失败");
+                    }
+                });
+            }
+        });
     }
 
     private void longReconec() {
@@ -358,9 +393,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etChatLogUid = (EditText) sheetDialog.findViewById(R.id.et_chat_record_uid);
         Button btShowChatLog =  (Button) sheetDialog.findViewById(R.id.bt_show_chat_record);
 
+        etSenStr = (EditText) sheetDialog.findViewById(R.id.et_sensitive_str);
+        Button btIsSens = (Button) sheetDialog.findViewById(R.id.bt_is_sensitive);
+        tvSensResult = (TextView) sheetDialog.findViewById(R.id.tv_sensitive_result);
+
         btIsLongLinked.setOnClickListener(this);
         btLongReconec.setOnClickListener(this);
         btShowChatLog.setOnClickListener(this);
+        btIsSens.setOnClickListener(this);
+
+
+        etSenStr.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s.length()==0){
+                    tvSensResult.setText("");
+                }
+            }
+        });
 
         sheetDialog.show();
     }

@@ -25,6 +25,32 @@
             android:text="显示聊天记录" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_sensitive_str"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:hint="str" />
+
+        <Button
+            android:id="@+id/bt_is_sensitive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:text="敏感？" />
+
+        <TextView
+            android:id="@+id/tv_sensitive_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/bt_long_islinked"
         android:layout_width="wrap_content"

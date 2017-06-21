@@ -11,6 +11,7 @@ import com.emagroup.imsdk.response.ChannelHandler;
 import com.emagroup.imsdk.response.ImResponse;
 import com.emagroup.imsdk.response.LCStateListener;
 import com.emagroup.imsdk.response.SendResponse;
+import com.emagroup.imsdk.response.SensListener;
 import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.ConfigUtils;
 import com.emagroup.imsdk.util.HttpRequestor;
@@ -433,6 +434,37 @@ public class EmaImSdk {
         ChatLogDao chatLogDao = new ChatLogDao(mActivity);
         ArrayList<MsgBean> msgBeenList = chatLogDao.queryMsg(selfUid, withUid, num);
         return msgBeenList;
+    }
+
+    /**
+     * 查询某句话是否有敏感词
+     */
+    public void isSensitiveStr(String str, final SensListener sensListener) {
+
+        final HashMap<String, String> param = new HashMap<>();
+        param.put("str", str);
+        new HttpRequestor().doPostAsync(ImUrl.getCheckSensitiveUrl(), param, new HttpRequestor.OnResponsetListener() {
+            @Override
+            public void OnResponse(String result) {
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    int status = jsonObject.getInt("status");
+                    if (0 == status) {
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        String resultStr = data.getString("resultStr");
+                        boolean isSensitive = data.getBoolean("result");
+
+                        SensBean sensBean = new SensBean(isSensitive, resultStr);
+                        sensListener.querySucc(sensBean);
+                    } else {
+                        sensListener.queryFail();
+                    }
+                } catch (JSONException e) {
+                    sensListener.queryFail();
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**

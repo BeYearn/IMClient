@@ -12,6 +12,11 @@ public class ImUrl {
     private static String PRODU_CTION_SERVER_URL;
 
 
+    public static String getCheckSensitiveUrl() {
+
+        return serverUrl + "ema-im/register/checkSensitiveWord";
+    }
+
     public static String getLoginUrl() {
 
         return serverUrl + "ema-im/register/login";
