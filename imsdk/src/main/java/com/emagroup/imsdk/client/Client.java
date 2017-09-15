@@ -3,6 +3,7 @@ package com.emagroup.imsdk.client;
 
 import android.app.Activity;
 import android.content.Context;
+
 import com.emagroup.imsdk.ErrorCode;
 import com.emagroup.imsdk.ImConstants;
 import com.emagroup.imsdk.MsgBean;
@@ -112,6 +113,11 @@ public class Client {
 
     public void joinChannel(String channelId, ChannelHandler handler) {
 
+        if (mInitInfo == null) {
+            handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
+            return;
+        }
+
         mHandlerMap.put(channelId, handler);
 
         HashMap<String, String> joinParam = new HashMap<>();
@@ -127,6 +133,11 @@ public class Client {
     }
 
     public void sendMsg(String channelId, String fName, String msg, String ext, SendResponse sendResponse, String handler) {
+
+        if (mInitInfo == null) {
+            sendResponse.onSendFail(ErrorCode.CODE_NOT_REGIST);
+            return;
+        }
 
         String currentTime = System.currentTimeMillis() + "";
         String shortTime = currentTime.substring(8, 13);
@@ -149,6 +160,12 @@ public class Client {
     }
 
     public void leaveChannel(String channelId) {
+
+        if (mInitInfo == null) {
+            ChannelHandler handler = mHandlerMap.get(channelId);
+            handler.onLeaveFail(ErrorCode.CODE_NOT_REGIST);
+            return;
+        }
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
@@ -564,15 +581,15 @@ public class Client {
         mHeartTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                HashMap<String, String> heartParam = new HashMap<>();
-                heartParam.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
-                heartParam.put(ImConstants.FUID, mInitInfo.get(ImConstants.FUID));
-                heartParam.put(ImConstants.HANDLER, "1");
-                heartParam.put(ImConstants.TID, "0"); // 固定
-                heartParam.put(ImConstants.MSG, "heart beat");
-                heartParam.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
-
                 try {
+                    HashMap<String, String> heartParam = new HashMap<>();
+                    heartParam.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
+                    heartParam.put(ImConstants.FUID, mInitInfo.get(ImConstants.FUID));
+                    heartParam.put(ImConstants.HANDLER, "1");
+                    heartParam.put(ImConstants.TID, "0"); // 固定
+                    heartParam.put(ImConstants.MSG, "heart beat");
+                    heartParam.put(ImConstants.MSG_ID, System.currentTimeMillis() + "");
+
                     String heartMsg = new JSONObject(heartParam).toString();
                     send(new Packet(heartMsg));
                     L.e("socketHeartContent", heartMsg);

@@ -133,6 +133,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         //EmaImSdk.getInstance().setDebugable(false);
+
+        HashMap<String, String> Params = new HashMap<>();
+        Params.put(ImConstants.APP_ID, "20007");
+        Params.put(ImConstants.APP_KEY, "a5fdfc18c72f4fc9602746ddec9f3b21");
+        Params.put("123",null);
+
+        String s = Params.get(null);
+
     }
 
 
