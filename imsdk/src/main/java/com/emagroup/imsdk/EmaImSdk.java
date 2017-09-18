@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.emagroup.imsdk.client.Client;
 import com.emagroup.imsdk.client.Packet;
@@ -34,6 +35,7 @@ import static com.emagroup.imsdk.ImConstants.EMA_IM_PUT_MSG_OK;
 
 /**
  * Created by Administrator on 2017/4/13.
+ *
  */
 
 public class EmaImSdk {
@@ -54,8 +56,8 @@ public class EmaImSdk {
 
     private boolean mFirstJoin = true; //第一加入频道才心跳
 
-    private HashMap<String, ChannelHandler> mHandlerMap; // 保存各个频道的回调
-    private HashMap<String, MsgQueue> mMsgQueueMap;   // 保存各个频道的消息队列
+    private HashMap<String, ChannelHandler> mHandlerMap = new HashMap<>(); // 保存各个频道的回调
+    private HashMap<String, MsgQueue> mMsgQueueMap = new HashMap<>();   // 保存各个频道的消息队列
 
     private Handler mHandler = new Handler() {
         @Override
@@ -113,9 +115,6 @@ public class EmaImSdk {
 
         this.mActivity = activity;
 
-        mHandlerMap = new HashMap<>();
-        mMsgQueueMap = new HashMap<>();
-
         mAppId = params.get(ImConstants.APP_ID);
         mUid = params.get(ImConstants.UID);
         mMsgLimit = params.get(ImConstants.MSG_NUM_LIMIT);
@@ -158,15 +157,14 @@ public class EmaImSdk {
      * @param handler   加入成功，停止成功，接收消息
      */
     public void joinShortLinkChannel(String channelId, final ChannelHandler handler) {
+        mHandlerMap.put(channelId, handler);
+        mMsgQueueMap.put(channelId, new MsgQueue());
 
         if (!isRegist) {
             handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
             L.e("joinShortLink", "error : please regist first");
             return;
         }
-
-        mHandlerMap.put(channelId, handler);
-        mMsgQueueMap.put(channelId, new MsgQueue());
 
         //加入的接口调用
         final HashMap<String, String> param = new HashMap<>();
@@ -269,6 +267,10 @@ public class EmaImSdk {
     public void leaveShortLinkChannel(final String channelId) {
 
         final ChannelHandler channelHandler = mHandlerMap.get(channelId);
+        if(channelHandler==null){
+            Log.e("leaveShortLinkChannel","the channelId was not joined:"+channelId);
+            return;
+        }
 
         HashMap<String, String> param = new HashMap<>();
         param.put(ImConstants.APP_ID, mAppId);

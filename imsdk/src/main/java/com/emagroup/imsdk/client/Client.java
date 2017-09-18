@@ -3,6 +3,7 @@ package com.emagroup.imsdk.client;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import com.emagroup.imsdk.ErrorCode;
 import com.emagroup.imsdk.ImConstants;
@@ -15,7 +16,6 @@ import com.emagroup.imsdk.save.ChatLogDao;
 import com.emagroup.imsdk.util.L;
 import com.emagroup.imsdk.util.SendResQueue;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -112,13 +112,12 @@ public class Client {
     }
 
     public void joinChannel(String channelId, ChannelHandler handler) {
+        mHandlerMap.put(channelId, handler);
 
         if (mInitInfo == null) {
             handler.onJoinFail(ErrorCode.CODE_NOT_REGIST);
             return;
         }
-
-        mHandlerMap.put(channelId, handler);
 
         HashMap<String, String> joinParam = new HashMap<>();
         joinParam.put(ImConstants.APP_ID, mInitInfo.get(ImConstants.APP_ID));
@@ -163,7 +162,11 @@ public class Client {
 
         if (mInitInfo == null) {
             ChannelHandler handler = mHandlerMap.get(channelId);
-            handler.onLeaveFail(ErrorCode.CODE_NOT_REGIST);
+            if(null!=handler){
+                handler.onLeaveFail(ErrorCode.CODE_NOT_REGIST);
+            }else {
+                Log.e("leaveLongLinkChannel","the channelId was not joined:"+channelId);
+            }
             return;
         }
 
@@ -434,7 +437,7 @@ public class Client {
                             break;
                     }
 
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
