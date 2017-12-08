@@ -95,11 +95,13 @@ public class HttpRequestor {
         StringBuffer resultBuffer = new StringBuffer();
         String tempLine = null;
 
-        if (httpURLConnection.getResponseCode() >= 300) {
-            throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
-        }
-
         try {
+            httpURLConnection.connect();
+
+            if (httpURLConnection.getResponseCode() >= 300) {
+                throw new Exception("HTTP Request is not success, Response code is " + httpURLConnection.getResponseCode());
+            }
+
             inputStream = httpURLConnection.getInputStream();
             inputStreamReader = new InputStreamReader(inputStream);
             reader = new BufferedReader(inputStreamReader);
@@ -107,6 +109,9 @@ public class HttpRequestor {
             while ((tempLine = reader.readLine()) != null) {
                 resultBuffer.append(tempLine);
             }
+
+            String result = resultBuffer.toString();
+            setOnResponse(listener, result);
         } catch (Exception e) {
             setOnResponse(listener, "{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
             e.printStackTrace();
@@ -124,9 +129,6 @@ public class HttpRequestor {
                 httpURLConnection.disconnect();
             }
         }
-
-        String result = resultBuffer.toString();
-        setOnResponse(listener, result);
     }
 
     /**
