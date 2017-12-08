@@ -512,11 +512,11 @@ public class EmaImSdk {
                         mServerHost = data.getString("host");
                         longLinkConnect(registResponse);    //在这里面某个时机 onsuccess   因为长连接更不太可靠些
                     } else {
-                        registResponse.onFailed(jsonObject.getInt("message"));
+                        registResponse.onFailed(ErrorCode.CODE_NOT_REGIST);
+                        Log.e("shortLinkConnect",jsonObject.getString("message"));
                     }
-
                 } catch (Exception e) {
-                    registResponse.onFailed(ErrorCode.CODE_JSON_ERROR);
+                    registResponse.onFailed(ErrorCode.CODE_NOT_REGIST);
                     e.printStackTrace();
                 }
             }

@@ -167,6 +167,8 @@ public class HttpRequestor {
         HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
 
         httpURLConnection.setDoOutput(true);
+        httpURLConnection.setDoInput(true);
+        httpURLConnection.setUseCaches(false);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Accept-Charset", charset);
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -198,8 +200,11 @@ public class HttpRequestor {
             while ((tempLine = reader.readLine()) != null) {
                 resultBuffer.append(tempLine);
             }
+
+            String result = resultBuffer.toString();
+            setOnResponse(listener, result);
         } catch (Exception e) {
-            setOnResponse(listener, "{\"config\":{},\"data\":{},\"message\":\"网络连接超时\",\"status\":\"9\"}");
+            setOnResponse(listener, "{\"config\":{},\"data\":{},\"message\":\"网络连接失败\",\"status\":\"9\"}");
             e.printStackTrace();
         } finally {
             if (outputStreamWriter != null) {
@@ -221,9 +226,6 @@ public class HttpRequestor {
                 httpURLConnection.disconnect();
             }
         }
-
-        String result = resultBuffer.toString();
-        setOnResponse(listener, result);
     }
 
 
@@ -255,7 +257,7 @@ public class HttpRequestor {
 
 
     public interface OnResponsetListener {
-        public abstract void OnResponse(String result);
+        void OnResponse(String result);
     }
 
     private void setOnResponse(OnResponsetListener listener, String result) {

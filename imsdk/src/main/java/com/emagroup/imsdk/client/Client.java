@@ -402,7 +402,7 @@ public class Client {
                     synchronized (lock) {
                         lock.wait();
                     }
-                    L.v(TAG, "Send :woken up BBBBBBBBBB");
+                    L.v(TAG, "Send :woken up BBBBBBBBB");
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();//发送的时候出现异常，说明socket被关闭了(服务器关闭)java.net.SocketException: sendto failed: EPIPE (Broken pipe)
